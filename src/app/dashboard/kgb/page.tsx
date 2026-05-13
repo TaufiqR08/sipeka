@@ -1,5 +1,6 @@
 import { ProtectedLayout } from "@/components/layout/ProtectedLayout";
 import { Plus, TrendingUp, CheckCircle, Clock, Upload } from "lucide-react";
+import Link from "next/link";
 
 export default function KGBPage() {
   const pengajuanKGB = [
@@ -43,10 +44,13 @@ export default function KGBPage() {
               Kelola pengajuan KGB dan upload dokumen pendukung
             </p>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+          <Link 
+            href="/dashboard/cuti/baru"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-medium shadow-md hover:shadow-lg active:scale-95 self-start"
+          >
             <Plus size={20} />
-            Daftar KGB
-          </button>
+            Buat Pengajuan Baru
+          </Link>
         </div>
 
         {/* Info Cards */}

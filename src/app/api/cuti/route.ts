@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { writeFile } from "fs/promises";
+import { writeFile, mkdir  } from "fs/promises";
 import { join } from "path";
+
 
 // GET — ambil semua cuti (sesuai level akses)
 export async function GET(req: NextRequest) {
@@ -48,81 +49,234 @@ export async function GET(req: NextRequest) {
 // POST — buat pengajuan cuti baru (Multipart Form Data)
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  
 
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const {pegawaiId} =  (session.user as any);
+  
   try {
     const formData = await req.formData();
-    
-    // Extract fields
+
+    // ======================
+    // EXTRACT DATA
+    // ======================
     const jenisCuti = formData.get("jenisCuti") as string;
     const alasan = formData.get("alasan") as string;
     const tanggalMulai = formData.get("tanggalMulai") as string;
     const tanggalSelesai = formData.get("tanggalSelesai") as string;
-    const jumlahHari = parseInt(formData.get("jumlahHari") as string);
+    const jumlahHari = parseInt(formData.get("jumlahHari") as string || "0");
     const durasiJenis = formData.get("durasiJenis") as string;
     const alamatSelama = formData.get("alamatSelama") as string;
-    
+
+    const userJabatan = formData.get("userJabatan") as string;
+    const userNama = formData.get("userNama") as string;
+    const userNip = formData.get("userNip") as string;
+
     const atasan1Jabatan = formData.get("atasan1Jabatan") as string;
     const atasan1Nama = formData.get("atasan1Nama") as string;
     const atasan1Nip = formData.get("atasan1Nip") as string;
-    
+
     const atasan2Jabatan = formData.get("atasan2Jabatan") as string;
     const atasan2Nama = formData.get("atasan2Nama") as string;
     const atasan2Nip = formData.get("atasan2Nip") as string;
 
+    const pegawai = await prisma.pegawai.findUnique({
+      where: {
+        id:pegawaiId,
+      },
+    }); 
+    // console.log(pegawai,session.user);
+    
+    if (!pegawai) {
+      return NextResponse.json(
+        { error: "Pegawai tidak ditemukan" },
+        { status: 404 }
+      );
+    }
+    
+    // ======================
+    // FILE UPLOAD
+    // ======================
     const file = formData.get("file") as File | null;
-    let fileUrl = null;
+    let fileUrl: string | null = null;
 
-    // Handle File Upload
     if (file && file.size > 0) {
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
 
-      // Validate file type
-      const validTypes = ["application/pdf", "image/jpeg", "image/png"];
+      // validate type
+      const validTypes = [
+        "application/pdf",
+        "image/jpeg",
+        "image/png",
+      ];
+
       if (!validTypes.includes(file.type)) {
-        return NextResponse.json({ error: "Format file harus PDF, JPG, atau PNG" }, { status: 400 });
+        return NextResponse.json(
+          { error: "Format file harus PDF, JPG, atau PNG" },
+          { status: 400 }
+        );
       }
 
+      // ======================
+      // AUTO CREATE FOLDER
+      // ======================
+      const uploadDir = join(
+        process.cwd(),
+        "public/uploads/cuti"
+      );
+
+      await mkdir(uploadDir, { recursive: true });
+
       const fileName = `${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
-      const path = join(process.cwd(), "public/uploads/cuti", fileName);
-      
-      await writeFile(path, buffer);
+      const filePath = join(uploadDir, fileName);
+
+      await writeFile(filePath, buffer);
+
       fileUrl = `/uploads/cuti/${fileName}`;
     }
 
-    // Get current pegawai info
-    const pegawai = await prisma.pegawai.findUnique({ 
-      where: { nip: session.user.nip } 
+    // ======================
+    // GET PEGAWAI
+    // ======================
+    
+  
+
+    const dcuti = await prisma.cuti.findFirst({
+      where: {
+        pegawaiId: pegawaiId,
+        status: {
+          not: "DISETUJUI",
+        },
+      },
     });
 
-    if (!pegawai) return NextResponse.json({ error: "Pegawai tidak ditemukan" }, { status: 404 });
-
-    // Create Cuti record
-    const cuti = await prisma.cuti.create({
-      data: {
-        pegawaiId: pegawai.id,
-        jenisCuti: jenisCuti as any,
-        alasan,
-        tanggalMulai: new Date(tanggalMulai),
-        tanggalSelesai: new Date(tanggalSelesai),
-        jumlahHari,
-        durasiJenis: durasiJenis as any,
-        alamatSelama,
+    const payload = {
+      pegawaiId: pegawai.id,
+      jenisCuti: jenisCuti as any,
+      alasan,
+      tanggalMulai: new Date(tanggalMulai),
+      tanggalSelesai: new Date(tanggalSelesai),
+      jumlahHari,
+      durasiJenis: durasiJenis as any,
+      alamatSelama,
+      filePendukungUrl: fileUrl ?? dcuti?.filePendukungUrl,
+      tt: JSON.stringify({
+        userNama,
+        userJabatan,
+        userNip,
         atasan1Jabatan,
         atasan1Nama,
         atasan1Nip,
         atasan2Jabatan,
         atasan2Nama,
         atasan2Nip,
-        filePendukungUrl: fileUrl,
-        status: "MENUNGGU_ATASAN_1",
+      }),
+      status: "MENUNGGU_ATASAN_1",
+    };
+
+    let cuti;
+
+    if (dcuti) {
+      cuti = await prisma.cuti.update({
+        where: {
+          id: dcuti.id,
+        },
+        data: payload,
+      });
+    } else {
+      cuti = await prisma.cuti.create({
+        data: payload,
+      });
+    }
+    
+
+    return NextResponse.json(cuti, { status: 201 });
+  } catch (error: any) {
+    console.error("Upload error:", error);
+
+    return NextResponse.json(
+      { error: error.message || "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const {pegawaiId:meId} =  (session.user as any);
+  try {
+    const formData = await req.formData();
+
+    const status = formData.get("status") as string;
+    const alasanPenolakan = formData.get("alasanPenolakan") as string;
+    const id = formData.get("id") as string;
+    const atasanStatus = formData.get("atasanStatus") as string;
+    
+    
+    const me = await prisma.pegawai.findUnique({
+      where: { id: meId }
+    });
+
+    const dcuti = await prisma.cuti.findFirst({
+      where: {
+        id,
+        status: {
+          not: "DISETUJUI",
+        },
       },
+    });
+
+    let payload={
+      status: status.toUpperCase(),
+      alasanPenolakan:alasanPenolakan,
+    } 
+    const tt = JSON.parse(dcuti?.tt);
+    const { atasan1Nip, atasan2Nip} = tt ;
+    switch (atasanStatus) {
+      case "1":
+        if(me?.nip == atasan1Nip){
+          payload={
+            tt:JSON.stringify({...tt, atasan1Status:status.toUpperCase(), atasan1Penolakan:alasanPenolakan,}),
+            status:(status == "Ditolak" ? "DITOLAK_ATASAN_1":"MENUNGGU_ATASAN_2"),
+            alasanPenolakan:alasanPenolakan,
+          }
+        }
+      break;
+      case "2":
+        if(me?.nip == atasan2Nip){
+          payload={
+            tt:JSON.stringify({...tt, atasan2Status:status.toUpperCase(),atasan2Penolakan:alasanPenolakan}),
+            status:(status == "Ditolak" ? "DITOLAK_ATASAN_2":"MENUNGGU_ADMIN"),
+            alasanPenolakan:alasanPenolakan,
+          }
+        }
+      break;
+    }
+    const cuti = await prisma.cuti.update({
+      data: payload,
+      where:{
+        id,
+        status: {
+          not: "DISETUJUI",
+        },
+      }
     });
 
     return NextResponse.json(cuti, { status: 201 });
   } catch (error: any) {
     console.error("Upload error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+
+    return NextResponse.json(
+      { error: error.message || "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }

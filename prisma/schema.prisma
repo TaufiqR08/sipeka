@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL")
+  url      = "mysql://root:@localhost:3306/simpeg_kesbangpol"
 }
 
 enum Role {
@@ -16,31 +16,15 @@ enum Role {
   PEGAWAI
 }
 
-model Bidang {
-  id      String    @id @default(cuid())
-  kode    String    @unique
-  nama    String
-  pegawai Pegawai[]
-}
-
 enum StatusPengajuan {
   DRAFT
   MENUNGGU_ATASAN_1
+  DITOLAK_ATASAN_1
   MENUNGGU_ATASAN_2
+  DITOLAK_ATASAN_2
   MENUNGGU_ADMIN
   DISETUJUI
   DITOLAK
-}
-
-model Notification {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  title     String
-  message   String
-  isRead    Boolean  @default(false)
-  link      String?
-  createdAt DateTime @default(now())
 }
 
 enum JenisCuti {
@@ -59,131 +43,211 @@ enum JenisKenaikanPangkat {
 }
 
 model User {
-  id            String         @id @default(cuid())
-  email         String         @unique
-  password      String
-  role          Role           @default(PEGAWAI)
-  pegawaiId     String?        @unique
-  pegawai       Pegawai?       @relation(fields: [pegawaiId], references: [id])
+  id String @id @default(cuid())
+
+  email    String @unique
+  password String
+
+  role Role @default(PEGAWAI)
+
+  pegawaiId String?  @unique
+  pegawai   Pegawai? @relation(fields: [pegawaiId], references: [id])
+
   notifications Notification[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Pegawai {
-  id              String    @id @default(cuid())
-  nip             String    @unique
-  nama            String
-  tempatLahir     String?
-  tanggalLahir    DateTime?
-  jenisKelamin    String?
-  agama           String?
-  alamat          String?
-  noTelp          String?
-  jabatan         String
-  tmtJabatan      DateTime?
-  bidangId        String?
-  bidang          Bidang?   @relation(fields: [bidangId], references: [id])
-  pangkat         String?
-  golonganRuang   String
-  tmtGolongan     DateTime?
-  unitKerja       String?   @default("Badan Kesatuan Bangsa dan Politik")
-  dinas           String?   @default("Kabupaten Sumbawa Barat")
-  masaKerja       String?
-  tglMasaKerja    DateTime?
-  gajiPokok       Int?
-  tmtPangkat      DateTime?
+  id String @id @default(cuid())
+
+  nip  String @unique
+  nama String
+
+  tempatLahir  String?
+  tanggalLahir DateTime?
+
+  jenisKelamin String?
+
+  agama  String?
+  alamat String?
+  noTelp String?
+
+  jabatan       String
+  pangkat       String?
+  golonganRuang String
+
+  tmtGolongan DateTime?
+
+  unitKerja String?
+
+  masaKerja    String?
+  tglMasaKerja DateTime?
+
+  gajiPokok Int?
+
+  tmtPangkat DateTime?
+
   pendidikanAkhir String?
-  statusPegawai   String    @default("AKTIF")
-  fotoUrl         String?
-  user            User?
-  cuti            Cuti[]
-  kgb             KenaikanGajiBerkala[]
-  pangkatRel      KenaikanPangkat[]
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+
+  statusPegawai String @default("AKTIF")
+
+  fotoUrl String?
+
+  user User?
+
+  cuti       Cuti[]  
+
+  bidangId String?
+  bidang   Bidang? @relation(fields: [bidangId], references: [id])
+
+  dinasDipimpin  Dinas[]  @relation("PimpinanDinas")
+  bidangDipimpin Bidang[] @relation("PimpinanBidang")
+  layananPegawai Layanan[] @relation("PegawaiLayanan")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  title   String
+  message String
+
+  isRead Boolean @default(false)
+
+  link String?
+
+  createdAt DateTime @default(now())
 }
 
 model Cuti {
-  id              String         @id @default(cuid())
-  pegawaiId       String
-  pegawai         Pegawai        @relation(fields: [pegawaiId], references: [id])
-  jenisCuti       JenisCuti
-  tanggalMulai    DateTime
-  tanggalSelesai  DateTime
-  jumlahHari      Int
-  durasiJenis     String         @default("HARI") // HARI, BULAN, TAHUN
-  alasan          String         @db.Text
-  alamatSelama    String?        @db.Text
-  sisaCuti        Int?
-  status          StatusPengajuan @default(DRAFT)
-  
-  // Atasan Details
-  atasan1Jabatan  String?
-  atasan1Nama     String?
-  atasan1Nip      String?
-  atasan2Jabatan  String?
-  atasan2Nama     String?
-  atasan2Nip      String?
-  
-  // File Pendukung
+  id String @id @default(cuid())
+
+  pegawaiId String
+  pegawai   Pegawai @relation(fields: [pegawaiId], references: [id])
+
+  jenisCuti JenisCuti
+
+  tanggalMulai   DateTime
+  tanggalSelesai DateTime
+
+  jumlahHari Int
+
+  durasiJenis String @default("HARI")
+
+  alasan       String  @db.Text
+  alamatSelama String? @db.Text
+
+  sisaCuti Int?
+
+  status StatusPengajuan @default(DRAFT)
+  tt       String  @db.Text
+  nomorSurat String?
+
+  alasanPenolakan String? @db.Text
+  catatanAdmin    String? @db.Text
   filePendukungUrl String?
-
-  // Tanda tangan (nama jabatan & status)
-  ttdKabirBidang  String?
-  ttdKabirStatus  Boolean        @default(false)
-  ttdSekretaris   String?
-  ttdSekretarisStatus Boolean    @default(false)
-  ttdKepalaBadan  String?
-  ttdKepalaBadanStatus Boolean   @default(false)
-  ttdSekda        String?
-  ttdSekdaStatus  Boolean        @default(false)
-  nomorSurat      String?
-  alasanPenolakan String?        @db.Text
-  catatanAdmin    String?        @db.Text
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model KenaikanGajiBerkala {
-  id              String         @id @default(cuid())
-  pegawaiId       String
-  pegawai         Pegawai        @relation(fields: [pegawaiId], references: [id])
-  gajiPokokSekarang Int
-  tmtGajiSekarang DateTime
-  golonganSekarang  String
-  tmtKGBDiusulkan DateTime
-  status          StatusPengajuan @default(DRAFT)
-  nomorSurat      String?
-  // Dokumen (url file)
-  docSkPangkat    String?
-  docSkKGB        String?
-  docSKP          String?
-  docHukdis       String?
-  docDRH          String?
-  catatanAdmin    String?        @db.Text
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+
+model Bidang {
+  id String @id @default(uuid())
+
+  nm String
+
+  jabatan String
+  jab     String
+
+  img String?
+
+  dinasId String
+  dinas   Dinas  @relation(fields: [dinasId], references: [id])
+
+  pimpinanId String?
+
+  pimpinan Pegawai? @relation("PimpinanBidang", fields: [pimpinanId], references: [id])
+
+  pegawai Pegawai[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model KenaikanPangkat {
-  id                  String              @id @default(cuid())
-  pegawaiId           String
-  pegawai             Pegawai             @relation(fields: [pegawaiId], references: [id])
-  jabatanSekarang     String
-  golonganSekarang    String
-  tmtPangkatSekarang  DateTime
-  usulPangkatKe       String
-  jenisKenaikanPangkat JenisKenaikanPangkat
-  status              StatusPengajuan     @default(DRAFT)
-  nomorSurat          String?
-  // Dokumen
-  docIjazah           String?
-  docSKP              String?
-  docSkPengangkatan   String?
-  docSkPangkat        String?
-  docDiklat           String?
-  catatanAdmin        String?             @db.Text
-  createdAt           DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
+model Dinas {
+  id String @id
+
+  nm String
+
+  pimpinanId String?
+
+  pimpinan Pegawai? @relation("PimpinanDinas", fields: [pimpinanId], references: [id])
+
+  bidang Bidang[]
+}
+
+
+
+enum StatusDokumen {
+  DISETUJUI
+  REVISI
+  DITOLAK
+  DIPROSES
+}
+model KategoriDokumen {
+  idKate   String   @id @default(cuid())
+  nmKate   String   // KGB / KP
+  ket      String?
+
+  daftarDokumen DaftarDokumen[]
+  layanan       Layanan[]
+}
+model DaftarDokumen {
+  idDaft   String   @id @default(cuid())
+  idKate   String
+  nmDaft   String
+  ketDaft  String?
+
+  kategori KategoriDokumen @relation(fields: [idKate], references: [idKate], onDelete: Cascade)
+
+  listDokumen ListDokumen[]
+}
+model Layanan {
+  idLaya   String   @id @default(cuid())
+  
+  pimpinanId String?
+  pimpinan Pegawai? @relation("PegawaiLayanan", fields: [pimpinanId], references: [id])
+
+  idKate   String
+  aktif    Boolean @default(true)
+
+  kategori KategoriDokumen @relation(fields: [idKate], references: [idKate], onDelete: Cascade)
+
+  listDokumen ListDokumen[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+model ListDokumen {
+  id        String   @id @default(cuid())
+
+  idLaya    String
+  idDaft    String
+
+  file      String   // path / url file
+  keterangan String?
+  status    StatusDokumen @default(DIPROSES)
+
+  layanan   Layanan @relation(fields: [idLaya], references: [idLaya], onDelete: Cascade)
+  daftar    DaftarDokumen @relation(fields: [idDaft], references: [idDaft], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }

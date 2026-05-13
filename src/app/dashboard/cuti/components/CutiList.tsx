@@ -10,22 +10,28 @@ import {
   Eye, 
   Shield,
   X,
+  Dock,
   Check,
-  AlertCircle
+  AlertCircle,
+  Pen
 } from "lucide-react";
+import Link from "next/link";
 
 interface CutiListProps {
   data: any[];
-  isAdmin: boolean;
+  me: any;
+
 }
 
-export function CutiList({ data: initialData, isAdmin }: CutiListProps) {
+export function CutiList({ data: initialData, me }: CutiListProps) {
   const [data, setData] = useState(initialData);
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [pendingStatus, setPendingStatus] = useState<string | null>(null);
+
+  const { isAdmin,nip } = me;
 
   const getStatusIcon = (status: string) => {
     const s = status.toUpperCase();
@@ -43,29 +49,59 @@ export function CutiList({ data: initialData, isAdmin }: CutiListProps) {
     return "bg-gray-100 text-gray-700 border-gray-200";
   };
 
-  const handleUpdateStatus = async (id: string, newStatus: string, reason?: string) => {
-    // In real app, call API
+  const handleUpdateStatus = async (
+    id: string,
+    newStatus: string,
+    reason?: string
+  ) => {
     try {
-      const res = await fetch(`/api/cuti/${id}/status`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus.replace(/ /g, "_"), alasanPenolakan: reason }),
+      const formData = new FormData();
+
+      formData.append("idCuti", id);
+      formData.append("atasanStatus", selectedItem.atasanStatus);
+      formData.append("id", selectedItem.id);
+      formData.append("status", newStatus.replace(/ /g, "_"));
+
+
+      if (reason) {
+        formData.append("alasanPenolakan", reason);
+      }
+
+      const res = await fetch(`/api/cuti`, {
+        method: "PUT",
+        body: formData,
       });
 
-      if (!res.ok) throw new Error("Gagal update status");
+      if (!res.ok) {
+        throw new Error("Gagal update status");
+      }
 
-      setData(prev => prev.map(item => 
-        item.id === id ? { ...item, status: newStatus, alasanPenolakan: reason } : item
-      ));
+      const updated = await res.json();
+
+      setData((prev) =>
+        prev.map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                status: updated.status.replace(/_/g, " "),
+                statusr:updated.status,
+                alasanPenolakan:updated.alasanPenolakan,
+                ...JSON.parse(updated.tt)
+              }
+            : item
+        )
+      );
+
       setShowStatusModal(false);
       setPendingStatus(null);
       setRejectionReason("");
+
       alert(`Status pengajuan berhasil diubah menjadi: ${newStatus}`);
     } catch (error: any) {
       alert(error.message);
     }
   };
-
+  
   return (
     <>
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
@@ -74,11 +110,9 @@ export function CutiList({ data: initialData, isAdmin }: CutiListProps) {
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50/50">
-                {isAdmin && (
-                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                    Pegawai
-                  </th>
-                )}
+                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                  Pegawai
+                </th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
                   Jenis Cuti
                 </th>
@@ -99,14 +133,12 @@ export function CutiList({ data: initialData, isAdmin }: CutiListProps) {
             <tbody className="divide-y divide-gray-100">
               {data.map((item) => (
                 <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
-                  {isAdmin && (
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-semibold text-gray-900">{item.pegawai}</span>
-                        <span className="text-xs text-gray-500">{item.nip}</span>
-                      </div>
-                    </td>
-                  )}
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col">
+                      <span className="text-sm font-semibold text-gray-900">{item.pegawai}</span>
+                      <span className="text-xs text-gray-500">{item.nip}</span>
+                    </div>
+                  </td>
                   <td className="px-6 py-4 text-sm font-medium text-gray-700">
                     {item.jenisCuti}
                   </td>
@@ -137,9 +169,44 @@ export function CutiList({ data: initialData, isAdmin }: CutiListProps) {
                         <span className="text-[10px] font-medium text-gray-400 group-hover:text-blue-600">Detail</span>
                       </button>
                       
-                      {isAdmin && (
+                      {
+                        me.id == item.pegawaiId && item.status != "DISETUJUI" &&
+                        <Link 
+                          href={"/dashboard/cuti/baru"}
+                          target="_blank"
+                          className="flex flex-col items-center group gap-1"
+                        >
+                          <div className="p-2 text-gray-400 group-hover:text-blue-600 group-hover:bg-blue-50 rounded-lg transition-all">
+                            <Pen size={18} />
+                          </div>
+                          <span className="text-[10px] font-medium text-gray-400 group-hover:text-blue-600">edit</span>
+                        </Link>
+                      }
+                      <Link 
+                        href={"/dashboard/cuti/pdf/"+item.id}
+                        target="_blank"
+                        className="flex flex-col items-center group gap-1"
+                      >
+                        <div className="p-2 text-gray-400 group-hover:text-blue-600 group-hover:bg-blue-50 rounded-lg transition-all">
+                          <Dock size={18} />
+                        </div>
+                        <span className="text-[10px] font-medium text-gray-400 group-hover:text-blue-600">pdf</span>
+                      </Link>
+                      {isAdmin && item.statusr !="DISETUJUI" && (
                         <button 
                           onClick={() => { setSelectedItem(item); setShowStatusModal(true); }}
+                          className="flex flex-col items-center group gap-1"
+                        >
+                          <div className="p-2 text-gray-400 group-hover:text-amber-600 group-hover:bg-amber-50 rounded-lg transition-all">
+                            <Shield size={18} />
+                          </div>
+                          <span className="text-[10px] font-medium text-gray-400 group-hover:text-amber-600">Statuss</span>
+                        </button>
+                      )}
+
+                      {me.nip == item.atasan1Nip && item.statusr =="MENUNGGU_ATASAN_1" && !isAdmin && (
+                        <button 
+                          onClick={() => { setSelectedItem({...item,atasanStatus:"1"}); setShowStatusModal(true); }}
                           className="flex flex-col items-center group gap-1"
                         >
                           <div className="p-2 text-gray-400 group-hover:text-amber-600 group-hover:bg-amber-50 rounded-lg transition-all">
@@ -148,13 +215,15 @@ export function CutiList({ data: initialData, isAdmin }: CutiListProps) {
                           <span className="text-[10px] font-medium text-gray-400 group-hover:text-amber-600">Status</span>
                         </button>
                       )}
-
-                      {!isAdmin && item.status === "Menunggu" && (
-                        <button className="flex flex-col items-center group gap-1">
-                          <div className="p-2 text-gray-400 group-hover:text-green-600 group-hover:bg-green-50 rounded-lg transition-all">
-                            <Edit size={18} />
+                      {me.nip == item.atasan2Nip && item.statusr =="MENUNGGU_ATASAN_2" && !isAdmin && (
+                        <button 
+                          onClick={() => { setSelectedItem({...item,atasanStatus:"2"}); setShowStatusModal(true); }}
+                          className="flex flex-col items-center group gap-1"
+                        >
+                          <div className="p-2 text-gray-400 group-hover:text-amber-600 group-hover:bg-amber-50 rounded-lg transition-all">
+                            <Shield size={18} />
                           </div>
-                          <span className="text-[10px] font-medium text-gray-400 group-hover:text-green-600">Ubah</span>
+                          <span className="text-[10px] font-medium text-gray-400 group-hover:text-amber-600">Status</span>
                         </button>
                       )}
                     </div>
@@ -214,10 +283,35 @@ export function CutiList({ data: initialData, isAdmin }: CutiListProps) {
                 </div>
               )}
 
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">{selectedItem.atasan1Jabatan}</p>
+                  <p className="text-sm font-semibold text-gray-900">{selectedItem.atasan1Nama}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">NIP</p>
+                  <p className="text-sm font-semibold text-gray-900">{selectedItem.atasan1Nip}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">{selectedItem.atasan2Jabatan}</p>
+                  <p className="text-sm font-semibold text-gray-900">{selectedItem.atasan2Nama}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">NIP</p>
+                  <p className="text-sm font-semibold text-gray-900">{selectedItem.atasan2Nip}</p>
+                </div>
+              </div>
+
               <div>
                 <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">Alasan Pengajuan</p>
-                <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded-lg border border-gray-100 mt-1 italic">"Ingin menghadiri acara keluarga di luar kota"</p>
+                <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded-lg border border-gray-100 mt-1 italic">{selectedItem.alasan}</p>
               </div>
+              {selectedItem.alasanPenolakan &&
+                <div>
+                  <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">Alasan Penolakan</p>
+                  <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded-lg border border-gray-100 mt-1 italic">{selectedItem.alasanPenolakan}</p>
+                </div>
+              }
             </div>
             <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 text-right">
               <button onClick={() => setShowDetailModal(false)} className="px-4 py-2 bg-gray-900 text-white rounded-lg font-bold text-sm hover:bg-gray-800 transition-colors">
@@ -275,7 +369,7 @@ export function CutiList({ data: initialData, isAdmin }: CutiListProps) {
                       </div>
                       <ChevronRight size={18} className="text-red-300" />
                     </button>
-                    <button 
+                    {/* <button 
                       onClick={() => handleUpdateStatus(selectedItem.id, "Menunggu")}
                       className="w-full flex items-center justify-between p-4 bg-yellow-50 hover:bg-yellow-100 border border-yellow-100 rounded-xl transition-all group"
                     >
@@ -286,7 +380,7 @@ export function CutiList({ data: initialData, isAdmin }: CutiListProps) {
                         <span className="font-bold text-yellow-700">Menunggu</span>
                       </div>
                       <ChevronRight size={18} className="text-yellow-300" />
-                    </button>
+                    </button> */}
                   </div>
                 </>
               ) : (

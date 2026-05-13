@@ -29,14 +29,14 @@ const navItems = [
   },
   {
     label: "Kenaikan Gaji Berkala",
-    href: "/dashboard/kgb",
+    href: "/dashboard/layanan/KGB",
     icon: TrendingUp,
     group: "Pengajuan",
     roles: ["ADMIN", "KEPALA_BADAN", "SEKRETARIS_BADAN", "KABAG_UMUM_KEPEGAWAIAN", "KEPALA_BIDANG", "PEGAWAI"],
   },
   {
     label: "Kenaikan Pangkat",
-    href: "/dashboard/pangkat",
+    href: "/dashboard/layanan/KP",
     icon: Star,
     group: "Pengajuan",
     roles: ["ADMIN", "KEPALA_BADAN", "SEKRETARIS_BADAN", "KABAG_UMUM_KEPEGAWAIAN", "KEPALA_BIDANG", "PEGAWAI"],

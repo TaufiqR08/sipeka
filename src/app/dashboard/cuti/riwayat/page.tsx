@@ -3,7 +3,7 @@ import { Plus, Calendar } from "lucide-react";
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { CutiList } from "./components/CutiList";
+import { CutiList } from "../components/CutiList";
 import { prisma } from "@/lib/prisma";
 import { isAdmin,isKabid,isPegawai } from "@/lib/sfBGS"
 
@@ -14,24 +14,21 @@ export default async function CutiPage() {
 
   const realAdmin =isAdmin(role);
   let whereClause: any = {
-    status:{
-      not:"DISETUJUI"
-    }
+    status: "DISETUJUI"
   };
   const me = await prisma.pegawai.findUnique({
     where: { id: pegawaiId }
   });
 
   if (isPegawai(role)) {
-    whereClause.pegawai = { id: pegawaiId };
+    whereClause.pegawai = { nip: user?.nip };
   }else if(isKabid(role)){
     const pegawaiBidang = await prisma.pegawai.findMany({
       where: { bidangId:me?.bidangId }
     });
+
     whereClause.pegawai ={
-      id:{
-        in: pegawaiBidang.map(v=>v.id)
-      }
+      in: pegawaiBidang.map(v=>v.id)
     }
   }
 
@@ -78,57 +75,37 @@ export default async function CutiPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
-              {realAdmin ? "Manajemen Pengajuan Cuti" : "Pengajuan Cuti Saya"}
+              Riwayat Pengajuan Cuti
             </h1>
             <p className="text-gray-600 mt-2">
-              {realAdmin 
-                ? "Daftar seluruh pengajuan cuti pegawai yang memerlukan tinjauan." 
-                : "Kelola dan pantau status pengajuan cuti Anda."}
+              Kelola dan pantau persetujuan cuti.
             </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Link 
-                href="/dashboard/cuti/riwayat"
-                className="px-6 py-2 border border-gray-300 rounded-lg bg-green-800 text-white font-medium hover:bg-green-10 transition-colors"
-              >
-                Riwayat Pengajuan
-              </Link>
-            <Link 
-              href="/dashboard/cuti/baru"
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-medium shadow-md hover:shadow-lg active:scale-95 self-start"
-            >
-              <Plus size={20} />
-              Pengajuan Baru
-            </Link>
           </div>
         </div>
 
         {/* Stats */}
-        {
-          !realAdmin && 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-              <p className="text-gray-500 text-sm font-medium">Progress Pengajuan</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">{displayData.length}</p>
-            </div>
-            <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-              <p className="text-gray-500 text-sm font-medium">
-                {realAdmin ? "Menunggu Persetujuan" : "Sisa Cuti Tahunan"}
-              </p>
-              <p className={`text-2xl font-bold mt-1 ${realAdmin ? "text-yellow-600" : "text-blue-600"}`}>
-                {realAdmin 
-                  ? displayData.filter(p => p.status.includes("MENUNGGU") || p.status.includes("Menunggu")).length 
-                  : "12 hari"}
-              </p>
-            </div>
-            <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-              <p className="text-gray-500 text-sm font-medium">Disetujui Bulan Ini</p>
-              <p className="text-2xl font-bold text-green-600 mt-1">
-                {displayData.filter(p => p.status === "DISETUJUI" || p.status === "Disetujui").length}
-              </p>
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+            <p className="text-gray-500 text-sm font-medium">Total Pengajuan</p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">{displayData.length}</p>
           </div>
-        }
+          <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+            <p className="text-gray-500 text-sm font-medium">
+              {realAdmin ? "Menunggu Persetujuan" : "Sisa Cuti Tahunan"}
+            </p>
+            <p className={`text-2xl font-bold mt-1 ${realAdmin ? "text-yellow-600" : "text-blue-600"}`}>
+              {realAdmin 
+                ? displayData.filter(p => p.status.includes("MENUNGGU") || p.status.includes("Menunggu")).length 
+                : "12 hari"}
+            </p>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+            <p className="text-gray-500 text-sm font-medium">Disetujui Bulan Ini</p>
+            <p className="text-2xl font-bold text-green-600 mt-1">
+              {displayData.filter(p => p.status === "DISETUJUI" || p.status === "Disetujui").length}
+            </p>
+          </div>
+        </div>
 
         {/* Table Content */}
         <CutiList data={displayData} 
