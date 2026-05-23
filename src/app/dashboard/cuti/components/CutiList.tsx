@@ -31,7 +31,7 @@ export function CutiList({ data: initialData, me }: CutiListProps) {
   const [rejectionReason, setRejectionReason] = useState("");
   const [pendingStatus, setPendingStatus] = useState<string | null>(null);
 
-  const { isAdmin,nip } = me;
+  const { realAdmin, nip, id: myPegawaiId } = me;
 
   const getStatusIcon = (status: string) => {
     const s = status.toUpperCase();
@@ -169,8 +169,9 @@ export function CutiList({ data: initialData, me }: CutiListProps) {
                         <span className="text-[10px] font-medium text-gray-400 group-hover:text-blue-600">Detail</span>
                       </button>
                       
+                      {/* Tombol Edit: hanya tampil jika cuti milik sendiri & belum disetujui */}
                       {
-                        me.id == item.pegawaiId && item.status != "DISETUJUI" &&
+                        myPegawaiId == item.pegawaiId && item.statusr != "DISETUJUI" &&
                         <Link 
                           href={"/dashboard/cuti/baru"}
                           target="_blank"
@@ -182,6 +183,8 @@ export function CutiList({ data: initialData, me }: CutiListProps) {
                           <span className="text-[10px] font-medium text-gray-400 group-hover:text-blue-600">edit</span>
                         </Link>
                       }
+
+                      {/* Tombol PDF */}
                       <Link 
                         href={"/dashboard/cuti/pdf/"+item.id}
                         target="_blank"
@@ -192,19 +195,22 @@ export function CutiList({ data: initialData, me }: CutiListProps) {
                         </div>
                         <span className="text-[10px] font-medium text-gray-400 group-hover:text-blue-600">pdf</span>
                       </Link>
-                      {isAdmin && item.statusr !="DISETUJUI" && (
+
+                      {/* Admin final approve/reject: hanya jika cuti bukan milik sendiri */}
+                      {realAdmin && item.statusr === "MENUNGGU_ADMIN" && myPegawaiId != item.pegawaiId && (
                         <button 
-                          onClick={() => { setSelectedItem(item); setShowStatusModal(true); }}
+                          onClick={() => { setSelectedItem({...item, atasanStatus: "admin"}); setShowStatusModal(true); }}
                           className="flex flex-col items-center group gap-1"
                         >
                           <div className="p-2 text-gray-400 group-hover:text-amber-600 group-hover:bg-amber-50 rounded-lg transition-all">
                             <Shield size={18} />
                           </div>
-                          <span className="text-[10px] font-medium text-gray-400 group-hover:text-amber-600">Statuss</span>
+                          <span className="text-[10px] font-medium text-gray-400 group-hover:text-amber-600">Status</span>
                         </button>
                       )}
 
-                      {me.nip == item.atasan1Nip && item.statusr =="MENUNGGU_ATASAN_1" && !isAdmin && (
+                      {/* Atasan 1 approve: hanya jika bukan cuti sendiri */}
+                      {nip == item.atasan1Nip && item.statusr == "MENUNGGU_ATASAN_1" && myPegawaiId != item.pegawaiId && (
                         <button 
                           onClick={() => { setSelectedItem({...item,atasanStatus:"1"}); setShowStatusModal(true); }}
                           className="flex flex-col items-center group gap-1"
@@ -215,7 +221,8 @@ export function CutiList({ data: initialData, me }: CutiListProps) {
                           <span className="text-[10px] font-medium text-gray-400 group-hover:text-amber-600">Status</span>
                         </button>
                       )}
-                      {me.nip == item.atasan2Nip && item.statusr =="MENUNGGU_ATASAN_2" && !isAdmin && (
+                      {/* Atasan 2 approve: hanya jika bukan cuti sendiri */}
+                      {nip == item.atasan2Nip && item.statusr == "MENUNGGU_ATASAN_2" && myPegawaiId != item.pegawaiId && (
                         <button 
                           onClick={() => { setSelectedItem({...item,atasanStatus:"2"}); setShowStatusModal(true); }}
                           className="flex flex-col items-center group gap-1"

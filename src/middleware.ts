@@ -13,6 +13,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
+  // Jika user belum login dan akses root "/", redirect ke login
+  if (!token && pathname === "/") {
+    return NextResponse.redirect(new URL("/auth/login", request.url));
+  }
+
   // Jika user belum login dan mencoba akses dashboard/rute protected, redirect ke login
   if (!token && pathname.startsWith("/dashboard")) {
     return NextResponse.redirect(new URL("/auth/login", request.url));
@@ -22,5 +27,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/auth/login/:path*"],
+  matcher: ["/", "/dashboard/:path*", "/auth/login/:path*"],
 };

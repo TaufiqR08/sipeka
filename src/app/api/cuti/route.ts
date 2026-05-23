@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { writeFile, mkdir  } from "fs/promises";
+import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
+import { kirimNotifikasiKeNip, kirimNotifikasiKePegawaiId } from "@/lib/notifikasi";
 
 
 // GET — ambil semua cuti (sesuai level akses)
@@ -11,7 +12,7 @@ export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { role, nip, bidang } = session.user as any;
+  const { role, bidangId, pegawaiId } = session.user as any;
   const { searchParams } = new URL(req.url);
   const status = searchParams.get("status");
   const page = parseInt(searchParams.get("page") ?? "1");
@@ -21,16 +22,33 @@ export async function GET(req: NextRequest) {
 
   if (status) whereClause.status = status;
 
-  // Filter berdasarkan level akses
+  // ============================================
+  // Filter visibilitas berdasarkan role
+  // ============================================
+
   if (role === "PEGAWAI") {
-    whereClause.pegawai = { nip };
+    // Hanya melihat pengajuan milik sendiri
+    whereClause.pegawaiId = pegawaiId;
+
   } else if (role === "KEPALA_BIDANG") {
-    whereClause.pegawai = { bidang };
+    // Melihat pengajuan seluruh pegawai di bidangnya saja
+    whereClause.pegawai = { bidangId };
+
   } else if (role === "KABAG_UMUM_KEPEGAWAIAN") {
-    whereClause.pegawai = {
-      role: { notIn: ["KEPALA_BADAN", "SEKRETARIS_BADAN"] }
+    // Kasubbag berada di Sekretariat → melihat pengajuan pegawai di Sekretariat saja
+    whereClause.pegawai = { bidangId };
+
+  } else if (role === "SEKRETARIS_BADAN") {
+    // Sekban melihat semua pengajuan kecuali milik Kepala Badan
+    // (karena Sekban adalah atasan langsung seluruh pegawai non-Kaban)
+    whereClause.NOT = {
+      pegawai: {
+        user: { role: "KEPALA_BADAN" },
+      },
     };
+
   }
+  // KEPALA_BADAN & ADMIN → tidak ada filter, bisa melihat semua pengajuan
 
   const [data, total] = await Promise.all([
     prisma.cuti.findMany({
@@ -175,7 +193,7 @@ export async function POST(req: NextRequest) {
         atasan2Nama,
         atasan2Nip,
       }),
-      status: "MENUNGGU_ATASAN_1",
+      status: "MENUNGGU_ATASAN_1" as const,
     };
 
     let cuti;
@@ -192,7 +210,18 @@ export async function POST(req: NextRequest) {
         data: payload,
       });
     }
-    
+
+    // Kirim notifikasi ke Atasan 1
+    try {
+      if (atasan1Nip) {
+        await kirimNotifikasiKeNip({
+          nip: atasan1Nip,
+          title: "Pengajuan Cuti Baru",
+          message: `${userNama} (${userJabatan}) mengajukan cuti dan memerlukan persetujuan Anda.`,
+          link: "/dashboard/cuti",
+        });
+      }
+    } catch (_) {}
 
     return NextResponse.json(cuti, { status: 201 });
   } catch (error: any) {
@@ -234,11 +263,16 @@ export async function PUT(req: NextRequest) {
       },
     });
 
-    let payload={
+    if (!dcuti) {
+      return NextResponse.json({ error: "Data cuti tidak ditemukan" }, { status: 404 });
+    }
+
+    let payload: any = {
       status: status.toUpperCase(),
-      alasanPenolakan:alasanPenolakan,
-    } 
-    const tt = JSON.parse(dcuti?.tt);
+      alasanPenolakan: alasanPenolakan,
+    }
+
+    const tt = JSON.parse(dcuti.tt);
     const { atasan1Nip, atasan2Nip} = tt ;
     switch (atasanStatus) {
       case "1":
@@ -269,6 +303,62 @@ export async function PUT(req: NextRequest) {
         },
       }
     });
+
+    // Kirim notifikasi berdasarkan perubahan status
+    try {
+      const ttData = JSON.parse(cuti.tt);
+      const namaAtasan = me?.nama ?? "Atasan";
+
+      if (cuti.status === "MENUNGGU_ATASAN_2") {
+        // Atasan 1 setujui → beri tahu pegawai dan Atasan 2
+        await kirimNotifikasiKePegawaiId({
+          pegawaiId: cuti.pegawaiId,
+          title: "Cuti Disetujui Atasan 1",
+          message: `Pengajuan cuti Anda disetujui oleh ${namaAtasan}. Menunggu persetujuan Atasan 2.`,
+          link: "/dashboard/cuti",
+        });
+        if (ttData?.atasan2Nip) {
+          await kirimNotifikasiKeNip({
+            nip: ttData.atasan2Nip,
+            title: "Pengajuan Cuti Menunggu Persetujuan",
+            message: `${ttData?.userNama ?? "Pegawai"} memerlukan persetujuan cuti Anda.`,
+            link: "/dashboard/cuti",
+          });
+        }
+      } else if (cuti.status === "DITOLAK_ATASAN_1") {
+        await kirimNotifikasiKePegawaiId({
+          pegawaiId: cuti.pegawaiId,
+          title: "Pengajuan Cuti Ditolak",
+          message: `Pengajuan cuti Anda ditolak oleh ${namaAtasan}.${alasanPenolakan ? ` Alasan: ${alasanPenolakan}` : ""}`,
+          link: "/dashboard/cuti",
+        });
+      } else if (cuti.status === "MENUNGGU_ADMIN") {
+        await kirimNotifikasiKePegawaiId({
+          pegawaiId: cuti.pegawaiId,
+          title: "Cuti Disetujui Atasan 2",
+          message: `Pengajuan cuti Anda disetujui oleh ${namaAtasan}. Menunggu proses Admin.`,
+          link: "/dashboard/cuti",
+        });
+        // Beri tahu Admin (Kasubbag/KABAG_UMUM_KEPEGAWAIAN)
+        const admins = await prisma.user.findMany({ where: { role: "KABAG_UMUM_KEPEGAWAIAN" } });
+        for (const admin of admins) {
+          const { kirimNotifikasi } = await import("@/lib/notifikasi");
+          await kirimNotifikasi({
+            userId: admin.id,
+            title: "Cuti Siap Diproses",
+            message: `Pengajuan cuti atas nama ${ttData?.userNama ?? "pegawai"} telah disetujui semua atasan dan siap untuk diproses.`,
+            link: "/dashboard/cuti",
+          });
+        }
+      } else if (cuti.status === "DITOLAK_ATASAN_2") {
+        await kirimNotifikasiKePegawaiId({
+          pegawaiId: cuti.pegawaiId,
+          title: "Pengajuan Cuti Ditolak",
+          message: `Pengajuan cuti Anda ditolak oleh ${namaAtasan}.${alasanPenolakan ? ` Alasan: ${alasanPenolakan}` : ""}`,
+          link: "/dashboard/cuti",
+        });
+      }
+    } catch (_) {}
 
     return NextResponse.json(cuti, { status: 201 });
   } catch (error: any) {

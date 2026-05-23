@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { kirimNotifikasiKePegawaiId } from "@/lib/notifikasi";
 
 export async function PATCH(
   req: NextRequest,
@@ -13,7 +14,7 @@ export async function PATCH(
   try {
     const { id } = params;
     const body = await req.json();
-    const { status, alasanPenolakan } = body;
+    const { status, alasanPenolakan, catatanAdmin } = body;
 
     // 1. Update status cuti
     const cuti = await prisma.cuti.update({
@@ -21,25 +22,24 @@ export async function PATCH(
       data: {
         status,
         alasanPenolakan: status === "DITOLAK" ? alasanPenolakan : null,
+        catatanAdmin: catatanAdmin ?? null,
       },
     });
 
-    // 2. Cari User yang terhubung dengan Pegawai ini untuk dikirimkan notifikasi
-    const userTarget = await prisma.user.findFirst({ 
-      where: { pegawaiId: cuti.pegawaiId } 
-    });
+    // 2. Kirim notifikasi ke pegawai pengaju
+    try {
+      const pesanStatus =
+        status === "DISETUJUI"
+          ? "Selamat! Pengajuan cuti Anda telah DISETUJUI oleh Admin."
+          : `Pengajuan cuti Anda DITOLAK oleh Admin.${alasanPenolakan ? ` Alasan: ${alasanPenolakan}` : ""}`;
 
-    // 3. Buat notifikasi jika user ditemukan
-    if (userTarget) {
-      await prisma.notification.create({
-        data: {
-          userId: userTarget.id,
-          title: "Update Status Cuti",
-          message: `Status pengajuan cuti Anda telah diperbarui menjadi ${status.replace(/_/g, " ")}.`,
-          link: "/dashboard/cuti",
-        }
+      await kirimNotifikasiKePegawaiId({
+        pegawaiId: cuti.pegawaiId,
+        title: status === "DISETUJUI" ? "Cuti Disetujui ✓" : "Cuti Ditolak ✗",
+        message: pesanStatus,
+        link: "/dashboard/cuti",
       });
-    }
+    } catch (_) {}
 
     return NextResponse.json(cuti);
   } catch (error: any) {

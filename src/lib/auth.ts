@@ -56,7 +56,8 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.role = (user as any).role;
         token.nama = (user as any).nama;
-        token.bidangId = (user as any).bidangId; // ✅ FIX
+        token.nip  = (user as any).nip;
+        token.bidangId = (user as any).bidangId;
         token.pegawaiId = (user as any).pegawaiId;
       }
 
@@ -64,14 +65,12 @@ export const authOptions: NextAuthOptions = {
     },
 
     async session({ session, token }) {
-      console.log("token", token);
-
-      if (token) {
-        session.user.id = token.sub!;
-
-        (session.user as any).role = token.role;
-        (session.user as any).nama = token.nama;
-        (session.user as any).bidangId = token.bidangId; // ✅ FIX
+      if (token && session.user) {
+        (session.user as any).id       = token.sub!;
+        (session.user as any).role     = token.role;
+        (session.user as any).nama     = token.nama;
+        (session.user as any).nip      = token.nip;
+        (session.user as any).bidangId  = token.bidangId;
         (session.user as any).pegawaiId = token.pegawaiId;
       }
 
