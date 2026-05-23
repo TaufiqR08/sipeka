@@ -32,3 +32,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# database files (sensitive / local only)
+*.sql
+*.js.bak
+update_*.js
+check_*.js
