@@ -27,6 +27,48 @@ export default function PCutiPage(
                 .radio-group input { width: auto; margin: 0; }
                 .alamat-box { border: 1px solid #9ca3af; border-radius: 0.25rem; padding: 0.4rem; background: #fefce8; }
 
+                .ttd-area {
+                  border: 2px dashed #9ca3af;
+                  border-radius: 6px;
+                  min-height: 80px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  margin: 6px 0;
+                  background: #fafafa;
+                  position: relative;
+                }
+                .ttd-placeholder {
+                  color: #b0b0b0;
+                  font-size: 11px;
+                  font-style: italic;
+                  text-align: center;
+                }
+                .ttd-status {
+                  font-size: 10px;
+                  font-weight: bold;
+                  padding: 2px 10px;
+                  border-radius: 4px;
+                  display: inline-block;
+                  margin-top: 4px;
+                  letter-spacing: 0.5px;
+                }
+                .ttd-status.disetujui {
+                  background: #dcfce7;
+                  color: #166534;
+                  border: 1px solid #86efac;
+                }
+                .ttd-status.menunggu {
+                  background: #fef9c3;
+                  color: #854d0e;
+                  border: 1px solid #fde047;
+                }
+                .ttd-status.ditolak {
+                  background: #fee2e2;
+                  color: #991b1b;
+                  border: 1px solid #fca5a5;
+                }
+
                 table.Tborder,
                 table.Tborder tr,
                 table.Tborder td,
@@ -49,7 +91,11 @@ export default function PCutiPage(
             </head>
             <body>
               ${formRef.current.outerHTML}
-              <script>window.onload = () => window.print();<\/script>
+              <script>
+                setTimeout(() => {
+                    window.print();
+                }, 1500);
+              </script>
             </body>
           </html>
         `);
@@ -303,7 +349,18 @@ export default function PCutiPage(
                         <td className=""></td>
                         <td className="border border-black p-2 text-center">
                             <span>{v.atasan1Jabatan}, </span>
-                            <br/><br/><br/>
+                            <div className="ttd-area">
+                              <div className="ttd-placeholder">
+                                {v.atasan1TtdUrl 
+                                  ? <img src={v.atasan1TtdUrl} alt="Tanda Tangan Atasan 1" style={{maxHeight: '70px', maxWidth: '180px'}} />
+                                  : <>Tanda Tangan Digital<br/>( Belum tersedia )</>
+                                }
+                              </div>
+                            </div>
+                            <span className={`ttd-status ${v.atasan1Status === 'DISETUJUI' ? 'disetujui' : v.atasan1Status?.includes?.('DITOLAK') ? 'ditolak' : 'menunggu'}`}>
+                              {v.atasan1Status === 'DISETUJUI' ? '✓ Disetujui' : v.atasan1Status?.includes?.('DITOLAK') ? '✗ Ditolak' : '⏳ Menunggu'}
+                            </span>
+                            <br/>
                             <span>({v.atasan1Nama}) <br /> {(v.atasan1Nip.length >2?"NIP. "+v.atasan1Nip:"")}</span>
                         </td>
                     </tr>
@@ -330,7 +387,18 @@ export default function PCutiPage(
                         <td className=""></td>
                         <td className="border border-black p-2 text-center">
                             <span>{v.atasan2Jabatan}, </span>
-                            <br/><br/><br/>
+                            <div className="ttd-area">
+                              <div className="ttd-placeholder">
+                                {v.atasan2TtdUrl 
+                                  ? <img src={v.atasan2TtdUrl} alt="Tanda Tangan Atasan 2" style={{maxHeight: '70px', maxWidth: '180px'}} />
+                                  : <>Tanda Tangan Digital<br/>( Belum tersedia )</>
+                                }
+                              </div>
+                            </div>
+                            <span className={`ttd-status ${v.atasan2Status === 'DISETUJUI' ? 'disetujui' : v.atasan2Status?.includes?.('DITOLAK') ? 'ditolak' : 'menunggu'}`}>
+                              {v.atasan2Status === 'DISETUJUI' ? '✓ Disetujui' : v.atasan2Status?.includes?.('DITOLAK') ? '✗ Ditolak' : '⏳ Menunggu'}
+                            </span>
+                            <br/>
                             <span>({v.atasan2Nama}) <br /> {(v.atasan2Nip.length >2?"NIP. "+v.atasan2Nip:"")}</span>
                         </td>
                     </tr>

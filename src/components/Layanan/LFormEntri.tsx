@@ -27,7 +27,7 @@ export default function LFormEntri({
             const data = new FormData();
 
             data.append("file", file);
-            data.append("idLaya", dlayanan.idLaya);
+            data.append("idLaya", dlayanan?.idLaya || "");
             data.append("idDaft", idDaft);
 
             const res = await fetch(
@@ -69,15 +69,15 @@ export default function LFormEntri({
             <h1 className="text-2xl font-bold text-gray-900">Pengajuan {sf.nmKate} {sf.detail ? ", An. "+sf.nm:""}</h1>
             <p className="p-1 text-gray-600 text-sm text-yellow-700 bg-yellow-100">
                 {
-                    dlayanan.aktif &&
+                    (!dlayanan || dlayanan.aktif) &&
                     (
                         sf.remainingDays>0  ?
                         ""
                             +(
                                 sf.on? 
-                                "Lengkapi formulir di bawah ini untuk mengajukan cuti, batas pengumpulan berkas "+sf.remainingDays+" hari lagi":
-                                "maaf belum waktunya untuk melakukan pengajuan ("+sf.remainingDays+" hari lagi)"):
-                        "tanggal pengajuan anda telah telat "+sf.remainingDays+" hari"
+                                "Lengkapi formulir di bawah ini untuk mengajukan " + sf.nmKate + ", batas pengumpulan berkas "+sf.remainingDays+" hari lagi":
+                                "Maaf belum waktunya untuk melakukan pengajuan ("+sf.remainingDays+" hari lagi)"):
+                        "Tanggal pengajuan anda telah telat "+sf.remainingDays+" hari"
                     )
                 }
             </p>
@@ -173,7 +173,10 @@ export default function LFormEntri({
                                 type="file"
                                 hidden
                                 accept=".pdf,.jpg,.jpeg,.png"
-                                onChange={async (e) => {handleUpload(e.target.files?.[0],item.idDaft);}}
+                                onChange={async (e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) handleUpload(file, item.idDaft);
+                                }}
                                 />
                             </label>
                         }
@@ -209,7 +212,10 @@ export default function LFormEntri({
                                     type="file"
                                     hidden
                                     accept=".pdf,.jpg,.jpeg,.png"
-                                    onChange={async (e) => {handleUpload(e.target.files?.[0],item.idDaft);}}
+                                    onChange={async (e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) handleUpload(file, item.idDaft);
+                                    }}
                                 />
                             </>
                         }

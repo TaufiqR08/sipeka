@@ -23,16 +23,26 @@ export default async function CutiPage() {
   });
 
   if (isPegawai(role)) {
-    whereClause.pegawai = { id: pegawaiId };
+    whereClause.OR = [
+      { pegawai: { id: pegawaiId } },
+      { tt: { contains: me?.nip } }
+    ];
   }else if(isKabid(role)){
     const pegawaiBidang = await prisma.pegawai.findMany({
       where: { bidangId:me?.bidangId }
     });
-    whereClause.pegawai ={
-      id:{
-        in: pegawaiBidang.map(v=>v.id)
+    whereClause.OR = [
+      {
+        pegawai: {
+          id: {
+            in: pegawaiBidang.map(v=>v.id)
+          }
+        }
+      },
+      {
+        tt: { contains: me?.nip }
       }
-    }
+    ];
   }
 
   const rawData = await prisma.cuti.findMany({
@@ -78,10 +88,10 @@ export default async function CutiPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
-              {realAdmin ? "Manajemen Pengajuan Cuti" : "Pengajuan Cuti Saya"}
+              {realAdmin || isKabid(role) ? "Manajemen Pengajuan Cuti" : "Pengajuan Cuti Saya"}
             </h1>
             <p className="text-gray-600 mt-2">
-              {realAdmin 
+              {realAdmin || isKabid(role)
                 ? "Daftar seluruh pengajuan cuti pegawai yang memerlukan tinjauan." 
                 : "Kelola dan pantau status pengajuan cuti Anda."}
             </p>
