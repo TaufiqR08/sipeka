@@ -9,6 +9,9 @@
 # next.js
 /out/
 
+# prevent secrets in standalone build
+.next/standalone/.env*
+
 # production
 /build
 
