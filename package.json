@@ -12,7 +12,8 @@
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
-    "db:seed": "ts-node prisma/seed.ts"
+    "db:seed": "ts-node prisma/seed.ts",
+    "deploy:build": "powershell -ExecutionPolicy Bypass -File ./deploy-build.ps1"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
