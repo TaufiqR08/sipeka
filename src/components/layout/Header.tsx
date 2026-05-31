@@ -9,6 +9,7 @@ const breadcrumbLabels: Record<string, string> = {
   kgb: "Kenaikan Gaji Berkala",
   pangkat: "Kenaikan Pangkat",
   pegawai: "Data Pegawai",
+  pemberitahuan: "Pemberitahuan",
 };
 
 export function Header() {

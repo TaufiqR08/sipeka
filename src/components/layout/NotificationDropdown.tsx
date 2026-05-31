@@ -187,7 +187,13 @@ export function NotificationDropdown() {
 
           {/* Footer */}
           <div className="p-3 border-t border-gray-100 bg-gray-50 text-center">
-            <span className="text-[10px] text-gray-400">Diperbarui otomatis setiap 30 detik</span>
+            <a
+              href="/dashboard/pemberitahuan"
+              onClick={() => setIsOpen(false)}
+              className="text-xs text-blue-600 hover:text-blue-700 font-semibold hover:underline transition-colors"
+            >
+              Lihat Semua Pemberitahuan →
+            </a>
           </div>
         </div>
       )}

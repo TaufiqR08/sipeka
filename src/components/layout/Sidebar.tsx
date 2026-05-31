@@ -9,6 +9,7 @@ import {
   Star,
   Users,
   LogOut,
+  Bell,
 } from "lucide-react";
 import { LABEL_ROLE, Role } from "@/types";
 
@@ -17,6 +18,13 @@ const navItems = [
     label: "Dashboard",
     href: "/dashboard",
     icon: LayoutDashboard,
+    group: "Utama",
+    roles: ["ADMIN", "KEPALA_BADAN", "SEKRETARIS_BADAN", "KABAG_UMUM_KEPEGAWAIAN", "KEPALA_BIDANG", "PEGAWAI"],
+  },
+  {
+    label: "Pemberitahuan",
+    href: "/dashboard/pemberitahuan",
+    icon: Bell,
     group: "Utama",
     roles: ["ADMIN", "KEPALA_BADAN", "SEKRETARIS_BADAN", "KABAG_UMUM_KEPEGAWAIAN", "KEPALA_BIDANG", "PEGAWAI"],
   },
