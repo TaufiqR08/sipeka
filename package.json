@@ -4,15 +4,18 @@
   "description": "Sistem Informasi Kepegawaian - Kesbangpol Sumbawa Barat",
   "private": true,
   "scripts": {
+    "postinstall": "prisma generate",
     "dev": "next dev",
     "build": "next build",
     "startp": "next start -p 3002",
     "starM": "NODE_OPTIONS='--max-old-space-size=512' next start -p 3001",
     "lint": "next lint",
     "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
     "db:seed": "ts-node prisma/seed.ts",
+    "db:generate": "prisma generate",
     "deploy:build": "powershell -ExecutionPolicy Bypass -File ./deploy-build.ps1"
   },
   "dependencies": {

@@ -41,7 +41,7 @@ Write-Host ""
 #   - Generate halaman statis (SSG) jika ada
 #   - Menghasilkan folder .next/standalone karena config output:'standalone'
 
-Write-Host "[1/4] Menjalankan 'next build'..." -ForegroundColor Yellow
+Write-Host "[1/6] Menjalankan 'next build'..." -ForegroundColor Yellow
 Write-Host "      (Ini akan compile project menjadi versi production)" -ForegroundColor Gray
 
 npm run build
@@ -59,7 +59,7 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-Write-Host "[1/4] Build berhasil!" -ForegroundColor Green
+Write-Host "[1/6] Build berhasil!" -ForegroundColor Green
 Write-Host ""
 
 # ============================================================
@@ -76,7 +76,7 @@ Write-Host ""
 # CDN terpisah (seperti CloudFront, Vercel Edge), jadi mereka
 # memisahkan file statis dari server code.
 
-Write-Host "[2/4] Meng-copy .next/static..." -ForegroundColor Yellow
+Write-Host "[2/6] Meng-copy .next/static..." -ForegroundColor Yellow
 Write-Host "      (File CSS, JS, dan font yang dibutuhkan browser)" -ForegroundColor Gray
 
 # --- PENJELASAN ---
@@ -112,9 +112,9 @@ if (Test-Path $sourceStatic) {
     # Ini yang KRUSIAL — tanpa step ini, tampilan tidak akan muncul!
     
     Copy-Item -Recurse -Force $sourceStatic $destStatic
-    Write-Host "[2/4] Static files berhasil di-copy!" -ForegroundColor Green
+    Write-Host "[2/6] Static files berhasil di-copy!" -ForegroundColor Green
 } else {
-    Write-Host "[2/4] WARNING: Folder .next/static tidak ditemukan!" -ForegroundColor Red
+    Write-Host "[2/6] WARNING: Folder .next/static tidak ditemukan!" -ForegroundColor Red
     Write-Host "      Pastikan build berhasil di step sebelumnya." -ForegroundColor Red
 }
 
@@ -131,7 +131,7 @@ Write-Host ""
 # 
 # Tanpa folder ini, semua gambar dan file statis akan 404 (not found).
 
-Write-Host "[3/4] Meng-copy folder public..." -ForegroundColor Yellow
+Write-Host "[3/6] Meng-copy folder public..." -ForegroundColor Yellow
 Write-Host "      (Gambar, favicon, file upload, dll)" -ForegroundColor Gray
 
 $sourcePublic = Join-Path $projectRoot "public"
@@ -142,15 +142,15 @@ if (Test-Path $sourcePublic) {
         Remove-Item -Recurse -Force $destPublic
     }
     Copy-Item -Recurse -Force $sourcePublic $destPublic
-    Write-Host "[3/4] Public folder berhasil di-copy!" -ForegroundColor Green
+    Write-Host "[3/6] Public folder berhasil di-copy!" -ForegroundColor Green
 } else {
-    Write-Host "[3/4] WARNING: Folder public tidak ditemukan!" -ForegroundColor Red
+    Write-Host "[3/6] WARNING: Folder public tidak ditemukan!" -ForegroundColor Red
 }
 
 Write-Host ""
 
 # ============================================================
-# STEP 4: Copy .env.production → .next/standalone/
+# STEP 4: Copy .env.production → .next/standalone/.env.production
 # ============================================================
 # --- PENJELASAN ---
 # File .env.production berisi konfigurasi yang dibutuhkan di server:
@@ -162,7 +162,7 @@ Write-Host ""
 # Tanpa file ini, aplikasi akan crash karena tidak tahu
 # cara konek ke database.
 
-Write-Host "[4/4] Meng-copy .env.production..." -ForegroundColor Yellow
+Write-Host "[4/6] Meng-copy .env.production..." -ForegroundColor Yellow
 Write-Host "      (Konfigurasi database, auth, dll untuk production)" -ForegroundColor Gray
 
 $sourceEnv = Join-Path $projectRoot ".env.production"
@@ -170,10 +170,78 @@ $destEnv = Join-Path $standaloneDir ".env.production"
 
 if (Test-Path $sourceEnv) {
     Copy-Item -Force $sourceEnv $destEnv
-    Write-Host "[4/4] .env.production berhasil di-copy!" -ForegroundColor Green
+    # Juga copy sebagai .env agar Next.js standalone otomatis membaca
+    $destEnvDot = Join-Path $standaloneDir ".env"
+    Copy-Item -Force $sourceEnv $destEnvDot
+    Write-Host "[4/6] .env.production berhasil di-copy! (juga sebagai .env)" -ForegroundColor Green
 } else {
-    Write-Host "[4/4] INFO: File .env.production tidak ditemukan, skip." -ForegroundColor Yellow
+    Write-Host "[4/6] INFO: File .env.production tidak ditemukan, skip." -ForegroundColor Yellow
     Write-Host "      (Pastikan env sudah dikonfigurasi di server)" -ForegroundColor Gray
+}
+
+Write-Host ""
+
+# ============================================================
+# STEP 5: Copy prisma/ folder → .next/standalone/prisma/
+# ============================================================
+# --- PENJELASAN ---
+# Prisma Client di runtime membutuhkan akses ke schema.prisma
+# untuk validasi dan query engine. Tanpa file ini, Prisma akan
+# error: "Unable to find prisma schema".
+# Kita juga copy migrations untuk keperluan `prisma migrate deploy`.
+
+Write-Host "[5/6] Meng-copy folder prisma/..." -ForegroundColor Yellow
+Write-Host "      (Schema dan migrations untuk Prisma runtime)" -ForegroundColor Gray
+
+$sourcePrisma = Join-Path $projectRoot "prisma"
+$destPrisma = Join-Path $standaloneDir "prisma"
+
+if (Test-Path $sourcePrisma) {
+    if (Test-Path $destPrisma) {
+        Remove-Item -Recurse -Force $destPrisma
+    }
+    Copy-Item -Recurse -Force $sourcePrisma $destPrisma
+    Write-Host "[5/6] Prisma folder berhasil di-copy!" -ForegroundColor Green
+} else {
+    Write-Host "[5/6] WARNING: Folder prisma tidak ditemukan!" -ForegroundColor Red
+}
+
+Write-Host ""
+
+# ============================================================
+# STEP 6: Pastikan Prisma Engine tersedia di standalone
+# ============================================================
+# --- PENJELASAN ---
+# Prisma membutuhkan query engine binary (libquery-engine) untuk
+# bisa menjalankan query ke database. Next.js standalone kadang
+# sudah meng-include ini di node_modules, tapi kita pastikan
+# dengan mengecek keberadaannya.
+
+Write-Host "[6/6] Memverifikasi Prisma engine di standalone..." -ForegroundColor Yellow
+
+$prismaEngineDir = Join-Path $standaloneDir "node_modules\.prisma\client"
+
+if (Test-Path $prismaEngineDir) {
+    $engineFiles = Get-ChildItem -Path $prismaEngineDir -Filter "*.node" -ErrorAction SilentlyContinue
+    if ($engineFiles) {
+        Write-Host "[6/6] Prisma engine ditemukan! ($($engineFiles.Count) file)" -ForegroundColor Green
+    } else {
+        Write-Host "[6/6] WARNING: Prisma engine binary tidak ditemukan di standalone!" -ForegroundColor Red
+        Write-Host "      Jalankan 'npx prisma generate' di server setelah upload." -ForegroundColor Yellow
+    }
+} else {
+    # Coba copy dari node_modules utama
+    Write-Host "[6/6] Meng-copy Prisma client ke standalone..." -ForegroundColor Yellow
+    $sourcePrismaClient = Join-Path $projectRoot "node_modules\.prisma"
+    $destPrismaClientParent = Join-Path $standaloneDir "node_modules\.prisma"
+    
+    if (Test-Path $sourcePrismaClient) {
+        Copy-Item -Recurse -Force $sourcePrismaClient $destPrismaClientParent
+        Write-Host "[6/6] Prisma client berhasil di-copy!" -ForegroundColor Green
+    } else {
+        Write-Host "[6/6] WARNING: .prisma client tidak ditemukan!" -ForegroundColor Red
+        Write-Host "      Jalankan 'npx prisma generate' sebelum build." -ForegroundColor Yellow
+    }
 }
 
 Write-Host ""
@@ -189,15 +257,24 @@ Write-Host ""
 Write-Host "Folder siap deploy:" -ForegroundColor White
 Write-Host "  $standaloneDir" -ForegroundColor Yellow
 Write-Host ""
+Write-Host "Isi folder standalone:" -ForegroundColor White
+Write-Host "  .next/static/     - CSS, JS, fonts" -ForegroundColor Gray
+Write-Host "  public/           - Gambar, uploads, favicon" -ForegroundColor Gray
+Write-Host "  prisma/           - Schema & migrations" -ForegroundColor Gray
+Write-Host "  .env              - Environment production" -ForegroundColor Gray
+Write-Host "  node_modules/     - Dependencies (termasuk Prisma engine)" -ForegroundColor Gray
+Write-Host "  server.js         - Next.js server entry point" -ForegroundColor Gray
+Write-Host ""
 Write-Host "LANGKAH SELANJUTNYA:" -ForegroundColor White
 Write-Host "  1. Upload folder '.next/standalone' ke server" -ForegroundColor Gray
 Write-Host "  2. Di server, masuk ke folder tersebut" -ForegroundColor Gray
-Write-Host "  3. Jalankan: node server.js" -ForegroundColor Gray
-Write-Host "  4. Aplikasi berjalan di port 3000 (default)" -ForegroundColor Gray
+Write-Host "  3. (Opsional) Jalankan: npx prisma migrate deploy" -ForegroundColor Gray
+Write-Host "  4. Jalankan: node server.js" -ForegroundColor Gray
+Write-Host "  5. Aplikasi berjalan di port 3000 (default)" -ForegroundColor Gray
 Write-Host ""
 Write-Host "TIPS:" -ForegroundColor White
 Write-Host "  - Gunakan PM2 agar app tetap jalan di background:" -ForegroundColor Gray
-Write-Host "    pm2 start server.js --name sipeka" -ForegroundColor Yellow
+Write-Host "    NODE_ENV=production pm2 start server.js --name sipeka" -ForegroundColor Yellow
 Write-Host "  - Untuk ganti port:" -ForegroundColor Gray
 Write-Host "    PORT=3002 node server.js" -ForegroundColor Yellow
 Write-Host ""
