@@ -189,33 +189,40 @@ let startedBrida= 2;
 export function noteNotifWaktuBrida() {
   cron.schedule("* * * * *", async () => {
     console.log("Cron notif Brida...");
-    const pegawai = await prisma.$queryRaw<PegawaiRaw[]>` SELECT * FROM Pegawaii `;
 
-    for (const v of pegawai) {
-      const kgb = getRemainingDays(v.tglMasaKerja ?? new Date(), 2);
-      const kp = getRemainingDays(v.tmtGolongan ?? new Date(), 4);
+    try {
+      const pegawai = await prisma.$queryRawUnsafe<PegawaiRaw[]>(
+        "SELECT * FROM Pegawaii"
+      );
 
-      if (waktuNotif(kgb.remainingDays) || startedBrida >0) {
-        await _notif({
-          title: `Warning !!!`,
-          message: ` Batas pengajuan Kenaikan Gaji Berkala tersisa ${kgb.remainingDays} hari lagi.`,
-          pegawaiId: "848d645b-4f48-11f1-aa91-2c56dcb03c3b",
-          sumber: fitur.BRIDA as any,
-          info: v.noTelp ?? "",
-        });
-        startedBrida--;
+      for (const v of pegawai) {
+        const kgb = getRemainingDays(v.tglMasaKerja ?? new Date(), 2);
+        const kp = getRemainingDays(v.tmtGolongan ?? new Date(), 4);
+
+        if (waktuNotif(kgb.remainingDays) || startedBrida >0) {
+          await _notif({
+            title: `Warning !!!`,
+            message: ` Batas pengajuan Kenaikan Gaji Berkala tersisa ${kgb.remainingDays} hari lagi.`,
+            pegawaiId: "848d645b-4f48-11f1-aa91-2c56dcb03c3b",
+            sumber: fitur.BRIDA as any,
+            info: v.noTelp ?? "",
+          });
+          startedBrida--;
+        }
+
+        if (waktuNotif(kp.remainingDays)|| startedBrida >0) {
+          await _notif({
+            title: `Warning !!!`,
+            message: `Batas pengajuan pengajuan Kenaikan Pangkat tersisa ${kp.remainingDays} hari lagi.`,
+            pegawaiId: "848d645b-4f48-11f1-aa91-2c56dcb03c3b",
+            sumber: fitur.BRIDA as any,
+            info: v.noTelp ?? "",
+          });
+          startedBrida--;
+        }
       }
-
-      if (waktuNotif(kp.remainingDays)|| startedBrida >0) {
-        await _notif({
-          title: `Warning !!!`,
-          message: `Batas pengajuan pengajuan Kenaikan Pangkat tersisa ${kp.remainingDays} hari lagi.`,
-          pegawaiId: "848d645b-4f48-11f1-aa91-2c56dcb03c3b",
-          sumber: fitur.BRIDA as any,
-          info: v.noTelp ?? "",
-        });
-        startedBrida--;
-      }
+    } catch (error) {
+      console.error("Cron Brida error:", error);
     }
   });
 }
