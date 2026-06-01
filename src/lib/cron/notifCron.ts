@@ -106,7 +106,7 @@ export async function startNotifCron() {
 
 let startedBrida= 2;
 export function noteNotifWaktuBrida() {
-  cron.schedule("* * * * *", async () => {
+  cron.schedule("0 7 * * *", async () => {
     console.log("Cron notif Brida...");
 
     try {
@@ -149,7 +149,7 @@ function waktuNotif(hari: number): boolean {
 
 let startedKesbangpol= 2;
 export function noteNotifWaktu() {
-  cron.schedule("* * * * *", async () => {
+  cron.schedule("0 7 * * *", async () => {
     console.log("Cron notif berjalan...");
 
     const pegawai = await prisma.pegawai.findMany();
