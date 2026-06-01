@@ -78,13 +78,6 @@
       "static/chunks/635-4e0e2adf47ede38d.js",
       "static/chunks/app/dashboard/cuti/riwayat/page-0904bacca3573645.js"
     ],
-    "/dashboard/cuti/pdf/[id]/page": [
-      "static/chunks/webpack-671a6ff215d07928.js",
-      "static/chunks/fd9d1056-b778a18b0daf24fe.js",
-      "static/chunks/23-959059d5e1f9e610.js",
-      "static/chunks/main-app-44f7cd0e1bbab5bd.js",
-      "static/chunks/app/dashboard/cuti/pdf/[id]/page-63cfeac2cb57306a.js"
-    ],
     "/dashboard/kgb/page": [
       "static/chunks/webpack-671a6ff215d07928.js",
       "static/chunks/fd9d1056-b778a18b0daf24fe.js",
@@ -95,16 +88,12 @@
       "static/chunks/835-684131a4ec19090b.js",
       "static/chunks/app/dashboard/kgb/page-642b9e65406f24d7.js"
     ],
-    "/dashboard/layanan/[id]/[idLaya]/page": [
+    "/dashboard/cuti/pdf/[id]/page": [
       "static/chunks/webpack-671a6ff215d07928.js",
       "static/chunks/fd9d1056-b778a18b0daf24fe.js",
       "static/chunks/23-959059d5e1f9e610.js",
       "static/chunks/main-app-44f7cd0e1bbab5bd.js",
-      "static/chunks/998-da42871a05f4e6f0.js",
-      "static/chunks/192-dc6d2bd4786dd064.js",
-      "static/chunks/835-684131a4ec19090b.js",
-      "static/chunks/595-dfdf39101dcb2843.js",
-      "static/chunks/app/dashboard/layanan/[id]/[idLaya]/page-0e82b8ce42643516.js"
+      "static/chunks/app/dashboard/cuti/pdf/[id]/page-63cfeac2cb57306a.js"
     ],
     "/dashboard/layanan/[id]/new/page": [
       "static/chunks/webpack-671a6ff215d07928.js",
@@ -129,7 +118,7 @@
       "static/chunks/513-a174c7e1988663bc.js",
       "static/chunks/app/dashboard/layanan/[id]/page-bea28b85fb6617b6.js"
     ],
-    "/dashboard/page": [
+    "/dashboard/layanan/[id]/[idLaya]/page": [
       "static/chunks/webpack-671a6ff215d07928.js",
       "static/chunks/fd9d1056-b778a18b0daf24fe.js",
       "static/chunks/23-959059d5e1f9e610.js",
@@ -137,7 +126,8 @@
       "static/chunks/998-da42871a05f4e6f0.js",
       "static/chunks/192-dc6d2bd4786dd064.js",
       "static/chunks/835-684131a4ec19090b.js",
-      "static/chunks/app/dashboard/page-485187915ed44c56.js"
+      "static/chunks/595-dfdf39101dcb2843.js",
+      "static/chunks/app/dashboard/layanan/[id]/[idLaya]/page-0e82b8ce42643516.js"
     ],
     "/dashboard/layanan/[id]/riwayat/page": [
       "static/chunks/webpack-671a6ff215d07928.js",
@@ -150,6 +140,16 @@
       "static/chunks/835-684131a4ec19090b.js",
       "static/chunks/513-a174c7e1988663bc.js",
       "static/chunks/app/dashboard/layanan/[id]/riwayat/page-635b9f4ae8f07e9a.js"
+    ],
+    "/dashboard/page": [
+      "static/chunks/webpack-671a6ff215d07928.js",
+      "static/chunks/fd9d1056-b778a18b0daf24fe.js",
+      "static/chunks/23-959059d5e1f9e610.js",
+      "static/chunks/main-app-44f7cd0e1bbab5bd.js",
+      "static/chunks/998-da42871a05f4e6f0.js",
+      "static/chunks/192-dc6d2bd4786dd064.js",
+      "static/chunks/835-684131a4ec19090b.js",
+      "static/chunks/app/dashboard/page-485187915ed44c56.js"
     ],
     "/dashboard/pangkat/page": [
       "static/chunks/webpack-671a6ff215d07928.js",
