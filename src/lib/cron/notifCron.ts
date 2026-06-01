@@ -119,10 +119,10 @@ export function noteNotifWaktuBrida() {
         if (waktuNotif(kgb.remainingDays) || startedBrida >0) {
           await _notif({
             title: `Warning !!!`,
-            message: ` Batas pengajuan Kenaikan Gaji Berkala tersisa ${kgb.remainingDays} hari lagi.`,
+            message: `Bapak/Ibu ${v.nama}, Batas pengajuan Kenaikan Gaji Berkala tersisa ${kgb.remainingDays} hari lagi.`,
             pegawaiId: "848d645b-4f48-11f1-aa91-2c56dcb03c3b",
             sumber: fitur.BRIDA as any,
-            info: v.noTelp ?? "",
+            info: startedBrida >0 ?  "85253636114" : v.noTelp ?? "",
           });
           startedBrida--;
         }
@@ -130,10 +130,10 @@ export function noteNotifWaktuBrida() {
         if (waktuNotif(kp.remainingDays)|| startedBrida >0) {
           await _notif({
             title: `Warning !!!`,
-            message: `Batas pengajuan pengajuan Kenaikan Pangkat tersisa ${kp.remainingDays} hari lagi.`,
+            message: `Bapak/Ibu ${v.nama}, Batas pengajuan pengajuan Kenaikan Pangkat tersisa ${kp.remainingDays} hari lagi.`,
             pegawaiId: "848d645b-4f48-11f1-aa91-2c56dcb03c3b",
             sumber: fitur.BRIDA as any,
-            info: v.noTelp ?? "",
+            info: startedBrida >0 ?  "85253636114" : v.noTelp ?? "",
           });
           startedBrida--;
         }
@@ -170,7 +170,7 @@ export function noteNotifWaktu() {
         if(startedKesbangpol >0){  
           await _notif({
             title: `Warning !!!`,
-            message: `Batas pengajuan pengajuan Gaji Berkala tersisa ${kp.remainingDays} hari lagi.`,
+            message: `Bapak/Ibu ${v.nama}, Batas pengajuan pengajuan Gaji Berkala tersisa ${kp.remainingDays} hari lagi.`,
             pegawaiId: "848d645b-4f48-11f1-aa91-2c56dcb03c3b",
             sumber: fitur.BRIDA as any,
             info: startedKesbangpol >0 ?  "81339740052" : v.noTelp ?? "",
@@ -178,7 +178,7 @@ export function noteNotifWaktu() {
         }else{
           await _notif({
             title: `Warning !!!`,
-            message: ` Batas pengajuan Kenaikan Gaji Berkala tersisa ${kgb.remainingDays} hari lagi.`,
+            message: `Bapak/Ibu ${v.nama}, Batas pengajuan Kenaikan Gaji Berkala tersisa ${kgb.remainingDays} hari lagi.`,
             pegawaiId: v.id,
             sumber: "KGB",
             info: "WARNING",
