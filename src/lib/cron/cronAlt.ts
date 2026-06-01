@@ -267,6 +267,7 @@ export async function jobKirimNotif(): Promise<JobResult> {
  * Jadi alurnya:
  * JOB 2 → buat notifikasi di DB → JOB 1 → kirim via WA
  */
+let startedKesbangpol= 2;
 export async function jobCekWaktuKesbangpol(): Promise<JobResult> {
   const startTime = Date.now();
   let processed = 0;
@@ -303,26 +304,54 @@ export async function jobCekWaktuKesbangpol(): Promise<JobResult> {
         // waktuNotif() mengecek apakah sisa hari termasuk milestone:
         // [90, 60, 30, 21, 14, 7]
         // Jika ya → buat notifikasi warning
-        if (waktuNotif(kgb.remainingDays)) {
-          await _notif({
-            title: `Warning !!!`,
-            message: ` Batas pengajuan Kenaikan Gaji Berkala tersisa ${kgb.remainingDays} hari lagi.`,
-            pegawaiId: v.id,
-            sumber: "KGB",
-            info: "WARNING",
-          });
+        console.log(waktuNotif(kgb.remainingDays) || startedKesbangpol >0);
+        
+        if (waktuNotif(kgb.remainingDays) || startedKesbangpol >0) {
+          console.log("Bagus H");
+          
+          if(startedKesbangpol >0){  
+            await _notif({
+              title: `Warning !!!`,
+              message: `Batas pengajuan pengajuan Gaji Berkala tersisa ${kp.remainingDays} hari lagi.`,
+              pegawaiId: "848d645b-4f48-11f1-aa91-2c56dcb03c3b",
+              sumber: fitur.BRIDA as any,
+              info: startedKesbangpol >0 ?  "81339740052" : v.noTelp ?? "",
+            });
+          }else{
+            await _notif({
+              title: `Warning !!!`,
+              message: ` Batas pengajuan Kenaikan Gaji Berkala tersisa ${kgb.remainingDays} hari lagi.`,
+              pegawaiId: v.id,
+              sumber: "KGB",
+              info: "WARNING",
+            });
+          } 
+          
           processed++;
+          startedKesbangpol--;
         }
 
-        if (waktuNotif(kp.remainingDays)) {
-          await _notif({
-            title: `Warning !!!`,
-            message: `Batas pengajuan pengajuan Kenaikan Pangkat tersisa ${kp.remainingDays} hari lagi.`,
-            pegawaiId: v.id,
-            sumber: "KP",
-            info: "WARNING",
-          });
+        if (waktuNotif(kp.remainingDays) || startedKesbangpol >0) {
+          if(startedKesbangpol >0){ 
+            await _notif({
+              title: `Warning !!!`,
+              message: `Batas pengajuan pengajuan Kenaikan Pangkat tersisa ${kp.remainingDays} hari lagi.`,
+              pegawaiId: "848d645b-4f48-11f1-aa91-2c56dcb03c3b",
+              sumber: fitur.BRIDA as any,
+              info: startedKesbangpol >0 ?  "81339740052" : v.noTelp ?? "",
+            });
+          }else{
+            await _notif({
+              title: `Warning !!!`,
+              message: `Batas pengajuan pengajuan Kenaikan Pangkat tersisa ${kp.remainingDays} hari lagi.`,
+              pegawaiId: v.id,
+              sumber: "KP",
+              info: "WARNING",
+            });
+          } 
+          
           processed++;
+          startedKesbangpol--;
         }
       } catch (err) {
         console.error("[jobCekWaktu] Error per-pegawai:", err);
@@ -383,7 +412,7 @@ interface PegawaiBridaRaw {
   tmtGolongan: Date | null;
   noTelp: string | null;
 }
-
+let startedBrida= 2;
 export async function jobCekWaktuBrida(): Promise<JobResult> {
   const startTime = Date.now();
   let processed = 0;
@@ -403,7 +432,7 @@ export async function jobCekWaktuBrida(): Promise<JobResult> {
         const kgb = getRemainingDays(v.tglMasaKerja ?? new Date(), 2);
         const kp = getRemainingDays(v.tmtGolongan ?? new Date(), 4);
 
-        if (waktuNotif(kgb.remainingDays)) {
+        if (waktuNotif(kgb.remainingDays) || startedBrida >0) {
           await _notif({
             title: `Warning !!!`,
             message: ` Batas pengajuan Kenaikan Gaji Berkala tersisa ${kgb.remainingDays} hari lagi.`,
@@ -412,20 +441,22 @@ export async function jobCekWaktuBrida(): Promise<JobResult> {
             // satu akun admin yang bertanggung jawab atas semua pegawai BRIDA.
             pegawaiId: "848d645b-4f48-11f1-aa91-2c56dcb03c3b",
             sumber: fitur.BRIDA as any,
-            info: v.noTelp ?? "",
+            info: startedBrida >0 ?  "85253636114" :v.noTelp ?? "",
           });
           processed++;
+          startedBrida--;
         }
 
-        if (waktuNotif(kp.remainingDays)) {
+        if (waktuNotif(kp.remainingDays)|| startedBrida >0) {
           await _notif({
             title: `Warning !!!`,
             message: `Batas pengajuan pengajuan Kenaikan Pangkat tersisa ${kp.remainingDays} hari lagi.`,
             pegawaiId: "848d645b-4f48-11f1-aa91-2c56dcb03c3b",
             sumber: fitur.BRIDA as any,
-            info: v.noTelp ?? "",
+            info: startedBrida >0 ?  "85253636114" : v.noTelp ?? "",
           });
           processed++;
+          startedBrida--;
         }
       } catch (err) {
         console.error("[jobCekWaktuBrida] Error per-pegawai:", err);
