@@ -423,9 +423,7 @@ export async function jobCekWaktuBrida(): Promise<JobResult> {
     // $queryRaw<T> menjalankan SQL mentah dan mengembalikan hasil
     // dengan tipe T. Di sini T = PegawaiBridaRaw[]
     // (array of PegawaiBridaRaw).
-    const pegawai = await prisma.$queryRaw<PegawaiBridaRaw[]>`
-      SELECT * FROM pegawaii
-    `;
+    const pegawai = await prisma.pegawaii.findMany();
 
     for (const v of pegawai) {
       try {
