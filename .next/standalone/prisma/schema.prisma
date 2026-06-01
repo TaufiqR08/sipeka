@@ -1,0 +1,311 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-1.1.x", "debian-openssl-3.0.x", "windows"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  KEPALA_BADAN
+  SEKRETARIS_BADAN
+  KABAG_UMUM_KEPEGAWAIAN
+  KEPALA_BIDANG
+  PEGAWAI
+}
+
+enum StatusPengajuan {
+  DRAFT
+  MENUNGGU_ATASAN_1
+  DITOLAK_ATASAN_1
+  MENUNGGU_ATASAN_2
+  DITOLAK_ATASAN_2
+  MENUNGGU_ADMIN
+  DISETUJUI
+  DITOLAK
+}
+
+enum JenisCuti {
+  TAHUNAN
+  SAKIT
+  MELAHIRKAN
+  BESAR
+  ALASAN_PENTING
+  LUAR_TANGGUNGAN_NEGARA
+}
+
+enum JenisKenaikanPangkat {
+  REGULER
+  PILIHAN
+  ANUMERTA
+}
+
+model User {
+  id String @id @default(cuid())
+
+  email    String @unique
+  password String
+
+  role Role @default(PEGAWAI)
+
+  pegawaiId String?  @unique
+  pegawai   Pegawai? @relation(fields: [pegawaiId], references: [id])
+
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Pegawai {
+  id String @id @default(cuid())
+
+  nip  String @unique
+  nama String
+
+  tempatLahir  String?
+  tanggalLahir DateTime?
+
+  jenisKelamin String?
+
+  agama  String?
+  alamat String?
+  noTelp String?
+
+  jabatan       String
+  pangkat       String?
+  golonganRuang String
+
+  tmtGolongan DateTime?
+
+  unitKerja String?
+
+  masaKerja    String?
+  tglMasaKerja DateTime?
+
+  gajiPokok Int?
+
+  tmtPangkat DateTime?
+
+  pendidikanAkhir String?
+
+  statusPegawai String @default("AKTIF")
+
+  fotoUrl String?
+
+  user User?
+
+  cuti       Cuti[]  
+
+  bidangId String?
+  bidang   Bidang? @relation(fields: [bidangId], references: [id])
+
+  dinasDipimpin  Dinas[]  @relation("PimpinanDinas")
+  bidangDipimpin Bidang[] @relation("PimpinanBidang")
+  layananPegawai Layanan[] @relation("PegawaiLayanan")
+  notifications Notification[] 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model Pegawaii {
+  id String @id @default(cuid())
+
+  nip  String @unique
+  nama String
+
+  tempatLahir  String?
+  tanggalLahir DateTime?
+
+  jenisKelamin String?
+
+  agama  String?
+  alamat String?
+  noTelp String?
+
+  jabatan       String
+  pangkat       String?
+  golonganRuang String
+
+  tmtGolongan DateTime?
+
+  unitKerja String?
+
+  masaKerja    String?
+  tglMasaKerja DateTime?
+
+  gajiPokok Int?
+
+  tmtPangkat DateTime?
+
+  pendidikanAkhir String?
+
+  statusPegawai String @default("AKTIF")
+
+  fotoUrl String?
+
+  bidangId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+enum fitur {
+  CUTI
+  KGB
+  KP
+  BRIDA
+}
+
+model Notification {
+  id String @id @default(cuid())
+
+  sumber fitur @default(CUTI)
+
+  pegawaiId String
+  pegawai Pegawai @relation(fields: [pegawaiId], references: [id])
+
+  cutiId String?
+  cuti Cuti? @relation(fields: [cutiId], references: [id])
+
+  idLaya String?
+  layanan Layanan? @relation(fields: [idLaya], references: [idLaya])
+
+  title String
+  message String
+
+  send Boolean @default(false)
+
+  info String?
+
+  createdAt DateTime @default(now())
+}
+
+model Cuti {
+  id String @id @default(cuid())
+
+  pegawaiId String
+  pegawai   Pegawai @relation(fields: [pegawaiId], references: [id])
+
+  jenisCuti JenisCuti
+
+  tanggalMulai   DateTime
+  tanggalSelesai DateTime
+
+  jumlahHari Int
+
+  durasiJenis String @default("HARI")
+
+  alasan       String  @db.Text
+  alamatSelama String? @db.Text
+
+  sisaCuti Int?
+
+  status StatusPengajuan @default(DRAFT)
+  tt       String  @db.Text
+  nomorSurat String?
+
+  notifications Notification[]
+
+  alasanPenolakan String? @db.Text
+  catatanAdmin    String? @db.Text
+  filePendukungUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+model Bidang {
+  id String @id @default(uuid())
+
+  nm String
+
+  jabatan String
+  jab     String
+
+  img String?
+
+  dinasId String
+  dinas   Dinas  @relation(fields: [dinasId], references: [id])
+
+  pimpinanId String?
+
+  pimpinan Pegawai? @relation("PimpinanBidang", fields: [pimpinanId], references: [id])
+
+  pegawai Pegawai[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Dinas {
+  id String @id
+
+  nm String
+
+  pimpinanId String?
+
+  pimpinan Pegawai? @relation("PimpinanDinas", fields: [pimpinanId], references: [id])
+
+  bidang Bidang[]
+}
+
+
+
+enum StatusDokumen {
+  DISETUJUI
+  REVISI
+  DITOLAK
+  DIPROSES
+}
+model KategoriDokumen {
+  idKate   String   @id @default(cuid())
+  nmKate   String   // KGB / KP
+  ket      String?
+
+  daftarDokumen DaftarDokumen[]
+  layanan       Layanan[]
+}
+model DaftarDokumen {
+  idDaft   String   @id @default(cuid())
+  idKate   String
+  nmDaft   String
+  ketDaft  String?
+
+  kategori KategoriDokumen @relation(fields: [idKate], references: [idKate], onDelete: Cascade)
+
+  listDokumen ListDokumen[]
+}
+model Layanan {
+  idLaya   String   @id @default(cuid())
+  
+  pimpinanId String?
+  pimpinan Pegawai? @relation("PegawaiLayanan", fields: [pimpinanId], references: [id])
+
+  idKate   String
+  aktif    Boolean @default(true)
+
+  kategori KategoriDokumen @relation(fields: [idKate], references: [idKate], onDelete: Cascade)
+
+  listDokumen ListDokumen[]
+  notifications Notification[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+model ListDokumen {
+  id        String   @id @default(cuid())
+
+  idLaya    String
+  idDaft    String
+
+  file      String   // path / url file
+  keterangan String?
+  status    StatusDokumen @default(DIPROSES)
+
+  layanan   Layanan @relation(fields: [idLaya], references: [idLaya], onDelete: Cascade)
+  daftar    DaftarDokumen @relation(fields: [idDaft], references: [idDaft], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
