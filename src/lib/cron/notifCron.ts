@@ -104,45 +104,45 @@ export async function startNotifCron() {
   });
 }
 
-let startedBrida= 2;
-export function noteNotifWaktuBrida() {
-  cron.schedule("0 7 * * *", async () => {
-    console.log("Cron notif Brida...");
+// let startedBrida= 2;
+// export function noteNotifWaktuBrida() {
+//   cron.schedule("0 7 * * *", async () => {
+//     console.log("Cron notif Brida...");
 
-    try {
-      const pegawai = await prisma.pegawaii.findMany();
+//     try {
+//       const pegawai = await prisma.pegawaii.findMany();
 
-      for (const v of pegawai) {
-        const kgb = getRemainingDays(v.tglMasaKerja ?? new Date(), 2);
-        const kp = getRemainingDays(v.tmtGolongan ?? new Date(), 4);
+//       for (const v of pegawai) {
+//         const kgb = getRemainingDays(v.tglMasaKerja ?? new Date(), 2);
+//         const kp = getRemainingDays(v.tmtGolongan ?? new Date(), 4);
 
-        if (waktuNotif(kgb.remainingDays) || startedBrida >0) {
-          await _notif({
-            title: `Warning !!!`,
-            message: `Bapak/Ibu ${v.nama}, Batas pengajuan Kenaikan Gaji Berkala tersisa ${kgb.remainingDays} hari lagi.`,
-            pegawaiId: "848d645b-4f48-11f1-aa91-2c56dcb03c3b",
-            sumber: fitur.BRIDA as any,
-            info: startedBrida >0 ?  "85253636114" : v.noTelp ?? "",
-          });
-          startedBrida--;
-        }
+//         if (waktuNotif(kgb.remainingDays) || startedBrida >0) {
+//           await _notif({
+//             title: `Warning !!!`,
+//             message: `Bapak/Ibu ${v.nama}, Batas pengajuan Kenaikan Gaji Berkala tersisa ${kgb.remainingDays} hari lagi.`,
+//             pegawaiId: "848d645b-4f48-11f1-aa91-2c56dcb03c3b",
+//             sumber: fitur.BRIDA as any,
+//             info: startedBrida >0 ?  "85253636114" : v.noTelp ?? "",
+//           });
+//           startedBrida--;
+//         }
 
-        if (waktuNotif(kp.remainingDays)|| startedBrida >0) {
-          await _notif({
-            title: `Warning !!!`,
-            message: `Bapak/Ibu ${v.nama}, Batas pengajuan pengajuan Kenaikan Pangkat tersisa ${kp.remainingDays} hari lagi.`,
-            pegawaiId: "848d645b-4f48-11f1-aa91-2c56dcb03c3b",
-            sumber: fitur.BRIDA as any,
-            info: startedBrida >0 ?  "85253636114" : v.noTelp ?? "",
-          });
-          startedBrida--;
-        }
-      }
-    } catch (error) {
-      console.error("Cron Brida error:", error);
-    }
-  });
-}
+//         if (waktuNotif(kp.remainingDays)|| startedBrida >0) {
+//           await _notif({
+//             title: `Warning !!!`,
+//             message: `Bapak/Ibu ${v.nama}, Batas pengajuan pengajuan Kenaikan Pangkat tersisa ${kp.remainingDays} hari lagi.`,
+//             pegawaiId: "848d645b-4f48-11f1-aa91-2c56dcb03c3b",
+//             sumber: fitur.BRIDA as any,
+//             info: startedBrida >0 ?  "85253636114" : v.noTelp ?? "",
+//           });
+//           startedBrida--;
+//         }
+//       }
+//     } catch (error) {
+//       console.error("Cron Brida error:", error);
+//     }
+//   });
+// }
 function waktuNotif(hari: number): boolean {
   return [90, 60, 30, 21, 14, 7].includes(hari);
 }
