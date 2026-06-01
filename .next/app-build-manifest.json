@@ -24,21 +24,6 @@
       "static/chunks/998-da42871a05f4e6f0.js",
       "static/chunks/app/page-f5a5d7c3911427c1.js"
     ],
-    "/auth/login/page": [
-      "static/chunks/webpack-671a6ff215d07928.js",
-      "static/chunks/fd9d1056-b778a18b0daf24fe.js",
-      "static/chunks/23-959059d5e1f9e610.js",
-      "static/chunks/main-app-44f7cd0e1bbab5bd.js",
-      "static/chunks/998-da42871a05f4e6f0.js",
-      "static/chunks/app/auth/login/page-7d7ed547c97cd271.js"
-    ],
-    "/auth/layout": [
-      "static/chunks/webpack-671a6ff215d07928.js",
-      "static/chunks/fd9d1056-b778a18b0daf24fe.js",
-      "static/chunks/23-959059d5e1f9e610.js",
-      "static/chunks/main-app-44f7cd0e1bbab5bd.js",
-      "static/chunks/app/auth/layout-df9a3b8171920937.js"
-    ],
     "/dashboard/cuti/pdf/[id]/page": [
       "static/chunks/webpack-671a6ff215d07928.js",
       "static/chunks/fd9d1056-b778a18b0daf24fe.js",
@@ -75,15 +60,20 @@
       "static/chunks/635-4e0e2adf47ede38d.js",
       "static/chunks/app/dashboard/cuti/page-b5e0fa4c1861bb33.js"
     ],
-    "/dashboard/cuti/baru/page": [
+    "/auth/login/page": [
       "static/chunks/webpack-671a6ff215d07928.js",
       "static/chunks/fd9d1056-b778a18b0daf24fe.js",
       "static/chunks/23-959059d5e1f9e610.js",
       "static/chunks/main-app-44f7cd0e1bbab5bd.js",
       "static/chunks/998-da42871a05f4e6f0.js",
-      "static/chunks/192-dc6d2bd4786dd064.js",
-      "static/chunks/835-684131a4ec19090b.js",
-      "static/chunks/app/dashboard/cuti/baru/page-0f6aabac4b6608d0.js"
+      "static/chunks/app/auth/login/page-7d7ed547c97cd271.js"
+    ],
+    "/auth/layout": [
+      "static/chunks/webpack-671a6ff215d07928.js",
+      "static/chunks/fd9d1056-b778a18b0daf24fe.js",
+      "static/chunks/23-959059d5e1f9e610.js",
+      "static/chunks/main-app-44f7cd0e1bbab5bd.js",
+      "static/chunks/app/auth/layout-df9a3b8171920937.js"
     ],
     "/dashboard/kgb/page": [
       "static/chunks/webpack-671a6ff215d07928.js",
@@ -94,6 +84,16 @@
       "static/chunks/192-dc6d2bd4786dd064.js",
       "static/chunks/835-684131a4ec19090b.js",
       "static/chunks/app/dashboard/kgb/page-642b9e65406f24d7.js"
+    ],
+    "/dashboard/cuti/baru/page": [
+      "static/chunks/webpack-671a6ff215d07928.js",
+      "static/chunks/fd9d1056-b778a18b0daf24fe.js",
+      "static/chunks/23-959059d5e1f9e610.js",
+      "static/chunks/main-app-44f7cd0e1bbab5bd.js",
+      "static/chunks/998-da42871a05f4e6f0.js",
+      "static/chunks/192-dc6d2bd4786dd064.js",
+      "static/chunks/835-684131a4ec19090b.js",
+      "static/chunks/app/dashboard/cuti/baru/page-0f6aabac4b6608d0.js"
     ],
     "/dashboard/layanan/[id]/[idLaya]/page": [
       "static/chunks/webpack-671a6ff215d07928.js",
@@ -151,16 +151,6 @@
       "static/chunks/835-684131a4ec19090b.js",
       "static/chunks/app/dashboard/page-485187915ed44c56.js"
     ],
-    "/dashboard/pemberitahuan/page": [
-      "static/chunks/webpack-671a6ff215d07928.js",
-      "static/chunks/fd9d1056-b778a18b0daf24fe.js",
-      "static/chunks/23-959059d5e1f9e610.js",
-      "static/chunks/main-app-44f7cd0e1bbab5bd.js",
-      "static/chunks/998-da42871a05f4e6f0.js",
-      "static/chunks/192-dc6d2bd4786dd064.js",
-      "static/chunks/835-684131a4ec19090b.js",
-      "static/chunks/app/dashboard/pemberitahuan/page-7ec06a9757621d57.js"
-    ],
     "/dashboard/pegawai/page": [
       "static/chunks/webpack-671a6ff215d07928.js",
       "static/chunks/fd9d1056-b778a18b0daf24fe.js",
@@ -170,6 +160,16 @@
       "static/chunks/192-dc6d2bd4786dd064.js",
       "static/chunks/835-684131a4ec19090b.js",
       "static/chunks/app/dashboard/pegawai/page-34b2073fce01cfbc.js"
+    ],
+    "/dashboard/pemberitahuan/page": [
+      "static/chunks/webpack-671a6ff215d07928.js",
+      "static/chunks/fd9d1056-b778a18b0daf24fe.js",
+      "static/chunks/23-959059d5e1f9e610.js",
+      "static/chunks/main-app-44f7cd0e1bbab5bd.js",
+      "static/chunks/998-da42871a05f4e6f0.js",
+      "static/chunks/192-dc6d2bd4786dd064.js",
+      "static/chunks/835-684131a4ec19090b.js",
+      "static/chunks/app/dashboard/pemberitahuan/page-7ec06a9757621d57.js"
     ],
     "/dashboard/pangkat/page": [
       "static/chunks/webpack-671a6ff215d07928.js",

@@ -185,12 +185,99 @@ export function noteNotifWaktu() {
   });
 }
 
+// Flag agar pengecekan tabel hanya dilakukan sekali saat startup
+let pegawaiiTableChecked = false;
+
+/**
+ * Pastikan tabel Pegawaii ada di database.
+ * Jika belum ada, buat tabel dan isi data dari tabel Pegawai.
+ * Tidak menggunakan Foreign Key.
+ */
+async function ensurePegawaiiTable() {
+  if (pegawaiiTableChecked) return;
+
+  try {
+    // Cek apakah tabel Pegawaii sudah ada
+    const tables = await prisma.$queryRawUnsafe<{ count: bigint }[]>(
+      `SELECT COUNT(*) as count FROM information_schema.tables 
+       WHERE table_schema = DATABASE() AND table_name = 'Pegawaii'`
+    );
+
+    const tableExists = Number(tables[0]?.count ?? 0) > 0;
+
+    if (!tableExists) {
+      console.log("[Brida] Tabel Pegawaii belum ada, membuat tabel...");
+
+      // Buat tabel Pegawaii tanpa Foreign Key
+      await prisma.$executeRawUnsafe(`
+        CREATE TABLE Pegawaii (
+          id VARCHAR(191) NOT NULL,
+          nip VARCHAR(191) NOT NULL,
+          nama VARCHAR(191) NOT NULL,
+          tempatLahir VARCHAR(191) NULL,
+          tanggalLahir DATETIME(3) NULL,
+          jenisKelamin VARCHAR(191) NULL,
+          agama VARCHAR(191) NULL,
+          alamat VARCHAR(191) NULL,
+          noTelp VARCHAR(191) NULL,
+          jabatan VARCHAR(191) NOT NULL,
+          pangkat VARCHAR(191) NULL,
+          golonganRuang VARCHAR(191) NOT NULL,
+          tmtGolongan DATETIME(3) NULL,
+          unitKerja VARCHAR(191) NULL,
+          masaKerja VARCHAR(191) NULL,
+          tglMasaKerja DATETIME(3) NULL,
+          gajiPokok INT NULL,
+          tmtPangkat DATETIME(3) NULL,
+          pendidikanAkhir VARCHAR(191) NULL,
+          statusPegawai VARCHAR(191) NOT NULL DEFAULT 'AKTIF',
+          fotoUrl VARCHAR(191) NULL,
+          bidangId VARCHAR(191) NULL,
+          createdAt DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+          updatedAt DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+          PRIMARY KEY (id),
+          UNIQUE INDEX Pegawaii_nip_key (nip)
+        ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
+      `);
+
+      // Isi data dari tabel Pegawai yang sudah ada
+      await prisma.$executeRawUnsafe(`
+        INSERT INTO Pegawaii (
+          id, nip, nama, tempatLahir, tanggalLahir, jenisKelamin,
+          agama, alamat, noTelp, jabatan, pangkat, golonganRuang,
+          tmtGolongan, unitKerja, masaKerja, tglMasaKerja,
+          gajiPokok, tmtPangkat, pendidikanAkhir, statusPegawai,
+          fotoUrl, bidangId, createdAt, updatedAt
+        )
+        SELECT 
+          id, nip, nama, tempatLahir, tanggalLahir, jenisKelamin,
+          agama, alamat, noTelp, jabatan, pangkat, golonganRuang,
+          tmtGolongan, unitKerja, masaKerja, tglMasaKerja,
+          gajiPokok, tmtPangkat, pendidikanAkhir, statusPegawai,
+          fotoUrl, bidangId, createdAt, updatedAt
+        FROM Pegawai
+      `);
+
+      console.log("[Brida] Tabel Pegawaii berhasil dibuat dan diisi dari data Pegawai ✅");
+    } else {
+      console.log("[Brida] Tabel Pegawaii sudah ada ✅");
+    }
+
+    pegawaiiTableChecked = true;
+  } catch (error) {
+    console.error("[Brida] Gagal memastikan tabel Pegawaii:", error);
+  }
+}
+
 let startedBrida= 2;
 export function noteNotifWaktuBrida() {
   cron.schedule("* * * * *", async () => {
     console.log("Cron notif Brida...");
 
     try {
+      // Pastikan tabel Pegawaii ada (hanya cek sekali)
+      await ensurePegawaiiTable();
+
       const pegawai = await prisma.$queryRawUnsafe<PegawaiRaw[]>(
         "SELECT * FROM Pegawaii"
       );
