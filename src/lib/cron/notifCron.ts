@@ -189,7 +189,7 @@ let startedBrida= 2;
 export function noteNotifWaktuBrida() {
   cron.schedule("* * * * *", async () => {
     console.log("Cron notif Brida...");
-    const pegawai = await prisma.$queryRaw<PegawaiRaw[]>` SELECT * FROM pegawaii `;
+    const pegawai = await prisma.$queryRaw<PegawaiRaw[]>` SELECT * FROM Pegawaii `;
 
     for (const v of pegawai) {
       const kgb = getRemainingDays(v.tglMasaKerja ?? new Date(), 2);
