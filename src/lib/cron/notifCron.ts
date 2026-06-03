@@ -92,11 +92,10 @@ export async function startNotifCron() {
 
       for (const v of dmsg) {
         if (v.sumber == "BRIDA") {
-          await execMSG({ ...v, noTelp: v.info ?? "" })
+          await execMSG({ ...v, noTelp: v.info ?? "" });
         } else {
-          await execMSG({ ...v, noTelp: v.pegawai?.noTelp ?? "" })
+          await execMSG({ ...v, noTelp: v.pegawai?.noTelp ?? "" });
         }
-
       }
     } catch (error) {
       console.log("Cron error:", error);
@@ -147,7 +146,7 @@ function waktuNotif(hari: number): boolean {
   return [90, 60, 30, 21, 14, 7].includes(hari);
 }
 
-let startedKesbangpol= 2;
+let startedKesbangpol = 2;
 export function noteNotifWaktu() {
   cron.schedule("0 7 * * *", async () => {
     console.log("Cron notif berjalan...");
@@ -158,24 +157,24 @@ export function noteNotifWaktu() {
       const kgb = getRemainingDays(v.tglMasaKerja ?? new Date(), 2);
       const kp = getRemainingDays(v.tmtGolongan ?? new Date(), 4);
 
-      if (waktuNotif(kgb.remainingDays)|| startedKesbangpol >0) {
+      if (waktuNotif(kgb.remainingDays) || startedKesbangpol > 0) {
         // await _notif({
         //   title: `Warning !!!`,
         //   message: ` Batas pengajuan Kenaikan Gaji Berkala tersisa ${kgb.remainingDays} hari lagi.`,
         //   pegawaiId: v.id,
         //   sumber: "KGB",
         //   info: "WARNING",
-        // }); 
-        
-        if(startedKesbangpol >0){  
+        // });
+
+        if (startedKesbangpol > 0) {
           await _notif({
             title: `Warning !!!`,
-            message: `Bapak/Ibu ${v.nama}, Batas pengajuan pengajuan Gaji Berkala tersisa ${kp.remainingDays} hari lagi.`,
+            message: `Bapak/Ibu ${v.nama}, Batas pengajuan pengajuan Gaji Berkala tersisa ${kgb.remainingDays} hari lagi.`,
             pegawaiId: "848d645b-4f48-11f1-aa91-2c56dcb03c3b",
             sumber: fitur.BRIDA as any,
-            info: startedKesbangpol >0 ?  "81339740052" : v.noTelp ?? "",
+            info: startedKesbangpol > 0 ? "81339740052" : (v.noTelp ?? ""),
           });
-        }else{
+        } else {
           await _notif({
             title: `Warning !!!`,
             message: `Bapak/Ibu ${v.nama}, Batas pengajuan Kenaikan Gaji Berkala tersisa ${kgb.remainingDays} hari lagi.`,
@@ -183,11 +182,11 @@ export function noteNotifWaktu() {
             sumber: "KGB",
             info: "WARNING",
           });
-        } 
+        }
         startedKesbangpol--;
       }
 
-      if (waktuNotif(kp.remainingDays)|| startedKesbangpol >0) {
+      if (waktuNotif(kp.remainingDays) || startedKesbangpol > 0) {
         // await _notif({
         //   title: `Warning !!!`,
         //   message: `Batas pengajuan pengajuan Kenaikan Pangkat tersisa ${kp.remainingDays} hari lagi.`,
@@ -195,15 +194,15 @@ export function noteNotifWaktu() {
         //   sumber: "KP",
         //   info: "WARNING",
         // });
-        if(startedKesbangpol >0){ 
+        if (startedKesbangpol > 0) {
           await _notif({
             title: `Warning !!!`,
             message: `Batas pengajuan pengajuan Kenaikan Pangkat tersisa ${kp.remainingDays} hari lagi.`,
             pegawaiId: "848d645b-4f48-11f1-aa91-2c56dcb03c3b",
             sumber: fitur.BRIDA as any,
-            info: startedKesbangpol >0 ?  "81339740052" : v.noTelp ?? "",
+            info: startedKesbangpol > 0 ? "81339740052" : (v.noTelp ?? ""),
           });
-        }else{
+        } else {
           await _notif({
             title: `Warning !!!`,
             message: `Batas pengajuan pengajuan Kenaikan Pangkat tersisa ${kp.remainingDays} hari lagi.`,
@@ -211,7 +210,7 @@ export function noteNotifWaktu() {
             sumber: "KP",
             info: "WARNING",
           });
-        }  
+        }
         startedKesbangpol--;
       }
     }

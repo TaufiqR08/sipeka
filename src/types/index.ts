@@ -34,7 +34,7 @@ export const LABEL_ROLE: Record<Role, string> = {
   ADMIN: "Administrator",
   KEPALA_BADAN: "Kepala Badan",
   SEKRETARIS_BADAN: "Sekretaris Badan",
-  KABAG_UMUM_KEPEGAWAIAN: "Ka. Bag. Umum & Kepegawaian",
+  KABAG_UMUM_KEPEGAWAIAN: "Kasubbag Umum & Kepegawaian",
   KEPALA_BIDANG: "Kepala Bidang",
   PEGAWAI: "Pegawai",
 };

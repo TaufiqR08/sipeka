@@ -4,13 +4,12 @@
 export async function register() {
   // Hanya jalankan di server (Node.js runtime), bukan di edge
   if (process.env.NEXT_RUNTIME === "nodejs") {
-    const { startNotifCron, noteNotifWaktu, noteNotifWaktuBrida } = await import(
+    const { startNotifCron, noteNotifWaktu } = await import(
       "@/lib/cron/notifCron"
     );
 
     startNotifCron();
     noteNotifWaktu();
-    noteNotifWaktuBrida();
 
     console.log("✅ Cron jobs started via instrumentation");
   }

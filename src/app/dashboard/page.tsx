@@ -171,8 +171,8 @@ export default async function DashboardPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-gray-600 text-sm font-medium">Pangkat</p>
-                    <p className="text-lg font-bold text-gray-900 mt-2">III/b</p>
-                    <p className="text-gray-500 text-xs mt-1">Penata Muda Tk.I</p>
+                    <p className="text-lg font-bold text-gray-900 mt-2">{me?.golonganRuang ?? "-"}</p>
+                    <p className="text-gray-500 text-xs mt-1">{me?.pangkat ?? "-"}</p>
                   </div>
                   <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
                     <Star size={24} className="text-purple-600" />
