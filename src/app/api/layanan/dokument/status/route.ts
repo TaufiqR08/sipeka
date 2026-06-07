@@ -81,7 +81,7 @@ export async function PATCH(req: NextRequest) {
           pegawaiId:pegawai?.id,
           idLaya:ddokument?.idLaya,
           sumber:kdDaft[0],
-          info:"DITOLAK"
+          info:"DISETUJUI",  // fix: sebelumnya salah diisi "DITOLAK"
         });
       break
     }

@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import LFormEntri from "@/components/Layanan/LFormEntri"
 import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
-import { getRemainingDays, isAdmin } from "@/lib/sfBGS";
+import { getRemainingDays, isAdmin, _notif } from "@/lib/sfBGS";
 
 export default async function LayananPage({
   params,
@@ -48,6 +48,7 @@ export default async function LayananPage({
       },
   });
 
+  // Layanan belum ada → buat baru dan kirim notif ke admin
   if (!dlayanan && on) {
       dlayanan = await prisma.layanan.create({
           data: {
@@ -56,6 +57,22 @@ export default async function LayananPage({
               aktif: true,
           },
       });
+
+      // Cari akun admin untuk menerima notifikasi
+      const adminUser = await prisma.user.findFirst({
+        where: { role: "ADMIN" },
+      });
+      if (adminUser?.pegawaiId) {
+        const jenis = params.id === "KGB" ? "Kenaikan Gaji Berkala" : "Kenaikan Pangkat";
+        _notif({
+          title: `Pengajuan ${jenis}, a.n ${Opegawai?.nama ?? "Pegawai"}`,
+          message: `Pegawai ${Opegawai?.nama ?? ""} (NIP: ${Opegawai?.nip ?? ""}) telah mengajukan ${jenis}. Mohon periksa kelengkapan dokumen di Aplikasi SIPEKA.`,
+          pegawaiId: adminUser.pegawaiId,
+          idLaya: dlayanan?.idLaya ?? null,
+          sumber: params.id as "KGB" | "KP",
+          info: "BARU",
+        });
+      }
   }
 
    const ddokument = await prisma.daftarDokumen.findMany({

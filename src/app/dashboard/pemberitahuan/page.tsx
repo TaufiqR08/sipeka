@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { isAdmin } from "@/lib/sfBGS";
 import { NotificationHistory } from "./components/NotificationHistory";
+import { redirect } from "next/navigation";
 
 export default async function PemberitahuanPage() {
   const session = await getServerSession(authOptions);
@@ -12,6 +13,12 @@ export default async function PemberitahuanPage() {
   const { role, pegawaiId, nama } = user;
 
   const adminAccess = isAdmin(role);
+
+  // Guard: hanya admin yang boleh akses halaman ini
+  if (!adminAccess) {
+    redirect("/dashboard");
+  }
+
 
   // Where clause berdasarkan role
   const baseWhere: any = adminAccess ? {} : { pegawaiId };
