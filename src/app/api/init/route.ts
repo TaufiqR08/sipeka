@@ -4,13 +4,7 @@ import { startNotifCron, noteNotifWaktu} from "@/lib/cron/notifCron";
 let started = false;
 
 export async function GET() {
-  if (!started) {
-    startNotifCron();
-    noteNotifWaktu();
-    // noteNotifWaktuBrida();
-    started = true;
-  }
-
+  startNotifCron();
   return NextResponse.json({
     success: true,
   });

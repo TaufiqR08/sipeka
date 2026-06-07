@@ -11,17 +11,20 @@ interface Isend {
 
 async function send({ message, target }: Isend): Promise<boolean> {
   try {
-    const formData = new FormData();
+    const token = process.env.FONNTE_TOKEN || "rGkDFJZnxeprGTKcV78S";
 
-    formData.append("target", `0${target}`);
+    // Format nomor: hapus awalan "0", ganti dengan "62"
+    const normalizedNumber = `62${target.replace(/^0/, "")}`;
+
+    const formData = new FormData();
+    formData.append("target", normalizedNumber);
     formData.append("message", message);
     formData.append("countryCode", "62");
-    // console.log(message,target);
 
     const resp = await fetch("https://api.fonnte.com/send", {
       method: "POST",
       headers: {
-        Authorization: process.env.WHATSAPP_TOKEN || "rGkDFJZnxeprGTKcV78S",
+        "Authorization": token,
       },
       body: formData,
     });
@@ -75,7 +78,7 @@ async function execMSG({
 }
 
 export async function startNotifCron() {
-  cron.schedule("* * * * *", async () => {
+  // cron.schedule("* * * * *", async () => {
     console.log("Cron notif berjalan...");
 
     try {
@@ -100,7 +103,7 @@ export async function startNotifCron() {
     } catch (error) {
       console.log("Cron error:", error);
     }
-  });
+  // });
 }
 
 // let startedBrida= 2;

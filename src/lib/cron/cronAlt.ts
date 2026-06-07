@@ -54,40 +54,38 @@ interface SendPayload {
  * Kirim pesan WhatsApp via Fonnte API
  *
  * --- PENJELASAN ---
- * FormData = format pengiriman data seperti form HTML.
- * fetch() = fungsi bawaan JavaScript untuk request HTTP (mirip curl).
- * async/await = cara menulis kode asynchronous (menunggu response)
- *   agar kode tetap mudah dibaca seperti kode synchronous biasa.
+ * Fonnte menggunakan FormData (bukan JSON body seperti Flowkirim).
+ * Auth menggunakan token langsung di header Authorization (tanpa "Bearer").
+ * Nomor tujuan dalam format: 62xxx (bukan 0xxx).
  *
  * @param payload - berisi target (nomor HP) dan message (isi pesan)
  * @returns true jika berhasil, false jika gagal
  */
 async function sendWhatsApp(payload: SendPayload): Promise<boolean> {
   try {
-    // --- PENJELASAN ---
-    // FormData menampung data yang akan dikirim ke API.
-    // Ini sama seperti mengisi form di website, tapi dilakukan via kode.
-    const formData = new FormData();
-    formData.append("target", `0${payload.target}`);   // tambah "0" di depan nomor
-    formData.append("message", payload.message);
-    formData.append("countryCode", "62");               // kode negara Indonesia
+    const token = process.env.FONNTE_TOKEN || "";
+
+    // Format nomor: hapus awalan "0", ganti dengan "62"
+    const normalizedNumber = `62${payload.target.replace(/^0/, "")}`;
 
     // --- PENJELASAN ---
-    // fetch() mengirim HTTP request ke server Fonnte (penyedia WA Gateway).
-    // method: "POST" = kita mengirim data (bukan mengambil data).
-    // headers.Authorization = token API agar Fonnte tahu ini request dari kita.
+    // Fonnte menerima FormData, bukan JSON.
+    // Header Authorization cukup tokennya saja (tanpa "Bearer").
+    const formData = new FormData();
+    formData.append("target", normalizedNumber);
+    formData.append("message", payload.message);
+    formData.append("countryCode", "62");
+
     const resp = await fetch("https://api.fonnte.com/send", {
       method: "POST",
       headers: {
-        Authorization: process.env.WHATSAPP_TOKEN || "",
+        "Authorization": token,
       },
       body: formData,
     });
 
-    // --- PENJELASAN ---
     // resp.json() mengubah response dari Fonnte menjadi object JavaScript.
     // .catch(() => ({})) = kalau gagal parse JSON, kembalikan object kosong
-    //   agar tidak crash.
     const result = await resp.json().catch(() => ({}));
     console.log("[Fonnte]", resp.status, result);
 
@@ -134,7 +132,7 @@ function waktuNotif(hari: number): boolean {
  * Alur:
  * 1. Query database → cari notification yang send = false
  * 2. Loop setiap notifikasi
- * 3. Kirim via WhatsApp API (Fonnte)
+ * 3. Kirim via WhatsApp API (Flowkirim)
  * 4. Kalau berhasil → update database (send = true)
  * 5. Return hasil ringkasan
  *
