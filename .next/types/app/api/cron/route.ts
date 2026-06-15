@@ -1,4 +1,4 @@
-// File: D:\PROJECT\sipeka-v1\sipeka-1\sipeka-1\src\app\api\cron\route.ts
+// File: D:\PROJECT\sipeka-v1\sipeka-v2\sipeka\src\app\api\cron\route.ts
 import * as entry from '../../../../../src/app/api/cron/route.js'
 import type { NextRequest } from 'next/server.js'
 

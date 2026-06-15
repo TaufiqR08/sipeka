@@ -1,4 +1,4 @@
-// File: D:\PROJECT\sipeka-v1\sipeka-1\sipeka-1\src\app\api\notifications\route.ts
+// File: D:\PROJECT\sipeka-v1\sipeka-v2\sipeka\src\app\api\notifications\route.ts
 import * as entry from '../../../../../src/app/api/notifications/route.js'
 import type { NextRequest } from 'next/server.js'
 
