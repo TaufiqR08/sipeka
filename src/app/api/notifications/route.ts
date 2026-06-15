@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { isAdmin } from "@/lib/sfBGS";
+import { isNotifAdmin, getNotificationWhereClause } from "@/lib/sfBGS";
 
 // GET — ambil notifikasi dengan pagination, filter, search
 export async function GET(req: NextRequest) {
@@ -19,13 +19,9 @@ export async function GET(req: NextRequest) {
   const status = searchParams.get("status"); // read | unread
   const search = searchParams.get("search");
 
-  // Build where clause
-  const where: any = {};
-
-  // Role-based: admin melihat semua, pegawai hanya miliknya
-  if (!isAdmin(role)) {
-    where.pegawaiId = pegawaiId;
-  }
+  // Build where clause berdasarkan role
+  const roleWhere = getNotificationWhereClause(role, pegawaiId, user.bidangId);
+  const where: any = { ...roleWhere };
 
   // Filter by sumber
   if (sumber && ["CUTI", "KGB", "KP"].includes(sumber)) {
@@ -64,7 +60,7 @@ export async function GET(req: NextRequest) {
     prisma.notification.count({ where }),
     prisma.notification.count({
       where: {
-        ...(isAdmin(role) ? {} : { pegawaiId }),
+        ...roleWhere,
         send: false,
       },
     }),
@@ -99,11 +95,9 @@ export async function PATCH(req: NextRequest) {
       data: { send: true },
     });
   } else {
-    // Tandai semua milik user ini (atau semua jika admin)
-    const updateWhere: any = { send: false };
-    if (!isAdmin(role)) {
-      updateWhere.pegawaiId = pegawaiId;
-    }
+    // Tandai semua berdasarkan role akses
+    const roleWhereForUpdate = getNotificationWhereClause(role, pegawaiId, user.bidangId);
+    const updateWhere: any = { send: false, ...roleWhereForUpdate };
     await prisma.notification.updateMany({
       where: updateWhere,
       data: { send: true },

@@ -3,25 +3,19 @@ import { Bell, CheckCircle, CalendarDays, TrendingUp, Star } from "lucide-react"
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { isAdmin } from "@/lib/sfBGS";
+import { isNotifAdmin, getNotificationWhereClause } from "@/lib/sfBGS";
 import { NotificationHistory } from "./components/NotificationHistory";
-import { redirect } from "next/navigation";
+import { isPegawai } from "@/lib/sfBGS";
 
 export default async function PemberitahuanPage() {
   const session = await getServerSession(authOptions);
   const user = session?.user as any;
-  const { role, pegawaiId, nama } = user;
+  const { role, pegawaiId, nama, bidangId } = user;
 
-  const adminAccess = isAdmin(role);
-
-  // Guard: hanya admin yang boleh akses halaman ini
-  if (!adminAccess) {
-    redirect("/dashboard");
-  }
-
+  const adminAccess = isNotifAdmin(role);
 
   // Where clause berdasarkan role
-  const baseWhere: any = adminAccess ? {} : { pegawaiId };
+  const baseWhere: any = getNotificationWhereClause(role, pegawaiId, bidangId);
 
   // Statistik
   const [total, unread, cutiCount, kgbCount, kpCount] = await Promise.all([
@@ -53,7 +47,9 @@ export default async function PemberitahuanPage() {
           <p className="text-gray-600 mt-2">
             {adminAccess
               ? "Pantau seluruh aktivitas dan notifikasi sistem dari semua pegawai."
-              : "Riwayat pemberitahuan dan aktivitas Anda di dalam sistem."}
+              : isPegawai(role)
+                ? "Riwayat pemberitahuan dan aktivitas Anda di dalam sistem."
+                : "Pemberitahuan dari bawahan di bidang Anda."}
           </p>
         </div>
 
@@ -109,7 +105,7 @@ export default async function PemberitahuanPage() {
         <NotificationHistory
           initialData={JSON.parse(JSON.stringify(initialNotifications))}
           totalCount={total}
-          isAdmin={adminAccess}
+          showPegawaiInfo={!isPegawai(role)}
         />
       </div>
     </ProtectedLayout>

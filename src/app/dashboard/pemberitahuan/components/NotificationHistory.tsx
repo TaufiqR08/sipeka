@@ -35,7 +35,7 @@ interface NotificationData {
 interface Props {
   initialData: NotificationData[];
   totalCount: number;
-  isAdmin: boolean;
+  showPegawaiInfo: boolean;
 }
 
 const SUMBER_CONFIG = {
@@ -68,7 +68,7 @@ const SUMBER_CONFIG = {
   },
 };
 
-export function NotificationHistory({ initialData, totalCount, isAdmin }: Props) {
+export function NotificationHistory({ initialData, totalCount, showPegawaiInfo }: Props) {
   const [notifications, setNotifications] = useState<NotificationData[]>(initialData);
   const [loading, setLoading] = useState(false);
   const [markingAll, setMarkingAll] = useState(false);
@@ -422,8 +422,7 @@ export function NotificationHistory({ initialData, totalCount, isAdmin }: Props)
                                 {notif.message}
                               </p>
 
-                              {/* Admin: show pegawai name */}
-                              {isAdmin && notif.pegawai && (
+                              {showPegawaiInfo && notif.pegawai && (
                                 <p className="text-[10px] text-gray-400 mt-1">
                                   👤 {notif.pegawai.nama} ({notif.pegawai.nip})
                                 </p>

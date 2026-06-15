@@ -26,8 +26,8 @@ const navItems = [
     href: "/dashboard/pemberitahuan",
     icon: Bell,
     group: "Utama",
-    // Hanya tampil untuk role admin
-    roles: ["ADMIN", "KEPALA_BADAN", "KABAG_UMUM_KEPEGAWAIAN"],
+    // Semua role bisa akses — data difilter berdasarkan role masing-masing
+    roles: ["ADMIN", "KEPALA_BADAN", "KABAG_UMUM_KEPEGAWAIAN", "SEKRETARIS_BADAN", "KEPALA_BIDANG", "PEGAWAI"],
   },
   {
     label: "Pengajuan Cuti",
