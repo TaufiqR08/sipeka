@@ -4,6 +4,7 @@ import { ProtectedLayout } from "@/components/layout/ProtectedLayout";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, TrendingUp, CheckCircle, Clock, Upload, Eye, Shield, Check, ChevronRight } from "lucide-react";
+import Swal from "sweetalert2";
 import Link from "next/link";
 import {formatDateShort, getRemainingDays } from "@/lib/sfBGS"
 export default function Fcuti({
@@ -50,12 +51,12 @@ export default function Fcuti({
         throw new Error(result.error);
         }
 
-        alert("Upload berhasil");
+        Swal.fire({ icon: "success", title: "Berhasil", text: "Upload berhasil" });
         _selectedItem({modal:false})
 
         router.refresh();
     } catch (err: any) { 
-        alert(err.message);
+        Swal.fire({ icon: "error", title: "Gagal", text: err.message || "Gagal upload" });
     }
   };
   
@@ -105,8 +106,8 @@ export default function Fcuti({
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {dtabel.map((item) => {
-                  const listStatus =  item.listDokumen.filter(v=>v.status!="DIPROSES");
-                  let masaPengajuan = {};
+                  const listStatus =  item.listDokumen.filter((v: any)=>v.status!="DIPROSES");
+                  let masaPengajuan: any = {};
                   if(ddokument[0].idKate == "KGB"){
                     masaPengajuan = getRemainingDays(item.pimpinan?.tglMasaKerja,2)
                   }else{
@@ -158,10 +159,10 @@ export default function Fcuti({
                             <>
                               <CheckCircle size={14} />
                               {
-                                (listStatus?.filter(v => v.status === "DISETUJUI").length || 0) === (ddokument?.length || 0)
+                                (listStatus?.filter((v: any) => v.status === "DISETUJUI").length || 0) === (ddokument?.length || 0)
                                   ? "DISETUJUI"
                                   : (
-                                      listStatus?.find(v => v.status !== "DISETUJUI")?.status
+                                      listStatus?.find((v: any) => v.status !== "DISETUJUI")?.status
                                       || `DIPROSES  `
                                     )
                               }
@@ -189,7 +190,7 @@ export default function Fcuti({
                               </div>
                               <span className="text-[10px] font-medium text-gray-400 group-hover:text-blue-600">Detail</span>
                             </Link>
-                            {(listStatus?.filter(v => v.status === "DISETUJUI").length || 0) === (ddokument?.length || 0) && item.aktif &&
+                            {(listStatus?.filter((v: any) => v.status === "DISETUJUI").length || 0) === (ddokument?.length || 0) && item.aktif &&
                               <button 
                                 onClick={() => { _selectedItem({modal:true,item})}}
                                 className="flex flex-col items-center group gap-1"

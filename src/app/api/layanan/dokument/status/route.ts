@@ -32,22 +32,33 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
+    const { pegawaiId: requesterId } = session.user as any;
+
     const ddokument = await prisma.listDokumen.findUnique({
       where:{
         id
       },
       include:{
         layanan:true,
-        // daftar:{
-        //   include:{
-        //     kategori:true
-        //   }
-        // },
       }
     })
-    const pegawai =await prisma.pegawai.findUnique({
+
+    if (!ddokument) {
+      return NextResponse.json({ error: "Dokumen tidak ditemukan" }, { status: 404 });
+    }
+
+    // Cegah pemilik pengajuan mengubah status dokumennya sendiri
+    if (ddokument.layanan.pimpinanId === requesterId) {
+      return NextResponse.json(
+        { error: "Anda tidak dapat mengubah status dokumen pengajuan milik Anda sendiri" },
+        { status: 403 }
+      );
+    }
+
+    const pegawai = await prisma.pegawai.findUnique({
       where:{
-        id : ddokument?.layanan.pimpinanId
+        // pimpinanId bisa null di schema, konversi ke undefined agar sesuai tipe Prisma
+        id: ddokument.layanan.pimpinanId ?? undefined
       }
     });
 
@@ -62,29 +73,36 @@ export async function PATCH(req: NextRequest) {
       },
     });
 
-    const kdDaft = ddokument?.idDaft.split("-");
-    switch (status) {
-      case "DITOLAK":
-        _notif({
-          title:`PENOLAKAN pada pengajuan ${kdDaft.join(" ")}`,
-          message:keterangan+`. respon ini diberikan oleh admin SIPEKA!!! `,
-          pegawaiId:pegawai?.id,
-          idLaya:ddokument?.idLaya,
-          sumber:kdDaft[0],
-          info:"DITOLAK"
-        });
-      break
-      case "DISETUJUI":
-        _notif({
-          title:`pengajuan ${kdDaft.join(" ")}`,
-          message:`pengajuan ini telah DISETUJUI, respon ini diberikan oleh admin SIPEKA!!! `,
-          pegawaiId:pegawai?.id,
-          idLaya:ddokument?.idLaya,
-          sumber:kdDaft[0],
-          info:"DISETUJUI",  // fix: sebelumnya salah diisi "DITOLAK"
-        });
-      break
+    const kdDaft = ddokument.idDaft.split("-");
+    // Cast sumber ke union type yang dibutuhkan _notif
+    const sumber = kdDaft[0] as "KP" | "KGB" | "CUTI";
+
+    // Kirim notifikasi hanya jika pegawai ditemukan
+    if (pegawai?.id) {
+      switch (status) {
+        case "DITOLAK":
+          _notif({
+            title:`PENOLAKAN pada pengajuan ${kdDaft.join(" ")}`,
+            message:keterangan+`. respon ini diberikan oleh admin SIPEKA!!! `,
+            pegawaiId: pegawai.id,
+            idLaya: ddokument.idLaya,
+            sumber,
+            info:"DITOLAK"
+          });
+          break;
+        case "DISETUJUI":
+          _notif({
+            title:`pengajuan ${kdDaft.join(" ")}`,
+            message:`pengajuan ini telah DISETUJUI, respon ini diberikan oleh admin SIPEKA!!! `,
+            pegawaiId: pegawai.id,
+            idLaya: ddokument.idLaya,
+            sumber,
+            info:"DISETUJUI",
+          });
+          break;
+      }
     }
+
     
 
     return NextResponse.json({

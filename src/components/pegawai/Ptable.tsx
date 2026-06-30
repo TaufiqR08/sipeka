@@ -4,6 +4,7 @@ import { ProtectedLayout } from "@/components/layout/ProtectedLayout";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, TrendingUp, CheckCircle, Clock, Upload, Eye, Shield, Check, ChevronRight } from "lucide-react";
+import Swal from "sweetalert2";
 import Link from "next/link";
 import {formatDateShort, getRemainingDays } from "@/lib/sfBGS"
 export default function Ptable({
@@ -49,12 +50,12 @@ export default function Ptable({
         throw new Error(result.error);
         }
 
-        alert("Upload berhasil");
+        Swal.fire({ icon: "success", title: "Berhasil", text: "Upload berhasil" });
         _selectedItem({modal:false})
 
         router.refresh();
     } catch (err: any) { 
-        alert(err.message);
+        Swal.fire({ icon: "error", title: "Gagal", text: err.message || "Gagal upload" });
     }
   };
   

@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import AdminDokumenAction from "./AdminDokumenAction";
+import Swal from "sweetalert2";
 
 export default function LFormEntri({
   sf,dlayanan,ddokument
@@ -44,11 +45,11 @@ export default function LFormEntri({
             throw new Error(result.error);
             }
 
-            alert("Upload berhasil");
+            Swal.fire({ icon: "success", title: "Berhasil", text: "Upload berhasil" });
 
             router.refresh();
         } catch (err: any) { 
-            alert(err.message);
+            Swal.fire({ icon: "error", title: "Gagal", text: err.message || "Gagal upload dokumen" });
         }
     };
 
@@ -166,7 +167,7 @@ export default function LFormEntri({
                         </div>
 
                         {
-                            !sf.detail && existing.status!="DISETUJUI"  &&
+                            ((!sf.detail && existing.status!="DISETUJUI") || (sf.isAdmin && item.nmDaft.toLowerCase().includes("surat pengantar")))  &&
                             <label className="cursor-pointer text-sm text-blue-600 hover:underline">
                                 Ganti File
                                 <input
@@ -183,17 +184,18 @@ export default function LFormEntri({
                         </div>
                          
                     )}
-                    {sf.isAdmin && existing && (
+                    {sf.isAdmin && existing && sf.detail && (
                         <AdminDokumenAction
                             dokumen={existing}
                         />
                     )}
 
+
                     {/* BELUM ADA FILE */}
                     {!existing?.file && sf.on && (
                         <label className="mt-4 border-2 border-dashed border-gray-300 rounded-xl p-6 flex flex-col items-center justify-center hover:border-blue-500 hover:bg-blue-50 transition-all cursor-pointer">
                         {
-                            !sf.detail  &&
+                            (!sf.detail || (sf.isAdmin && item.nmDaft.toLowerCase().includes("surat pengantar")))  &&
                             <>
                                 <Upload
                                     size={28}
@@ -205,7 +207,7 @@ export default function LFormEntri({
                                 </p>
 
                                 <p className="text-xs text-gray-500 mt-1">
-                                    PDF, JPG, PNG (Maks. 5MB)
+                                    PDF, JPG, PNG (Maks. 10MB)
                                 </p>
 
                                 <input

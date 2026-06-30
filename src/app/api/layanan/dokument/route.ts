@@ -46,10 +46,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (file.size > 5 * 1024 * 1024) {
+    if (file.size > 10 * 1024 * 1024) {
       return NextResponse.json(
         {
-          error: "Ukuran file maksimal 5MB",
+          error: "Ukuran file maksimal 10MB",
         },
         {
           status: 400,

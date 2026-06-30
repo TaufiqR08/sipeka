@@ -61,7 +61,7 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   
   const user = session?.user as any;
@@ -84,6 +84,35 @@ export function Sidebar() {
     await signOut({ redirect: false });
     router.push("/auth/login");
   };
+
+  // Tampilkan skeleton saat session masih loading
+  if (status === "loading") {
+    return (
+      <aside className="w-64 bg-[#0B2545] flex flex-col flex-shrink-0 min-h-screen animate-pulse">
+        <div className="flex items-center gap-3 px-5 py-6 border-b border-white/10">
+          <div className="w-11 h-11 bg-white/10 rounded-xl" />
+          <div className="space-y-2">
+            <div className="w-24 h-3 bg-white/10 rounded" />
+            <div className="w-16 h-2 bg-white/10 rounded" />
+          </div>
+        </div>
+        <nav className="flex-1 py-4 px-5 space-y-2">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="h-9 bg-white/5 rounded-lg" />
+          ))}
+        </nav>
+        <div className="border-t border-white/10 p-4">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-white/10" />
+            <div className="space-y-1">
+              <div className="w-20 h-3 bg-white/10 rounded" />
+              <div className="w-14 h-2 bg-white/10 rounded" />
+            </div>
+          </div>
+        </div>
+      </aside>
+    );
+  }
 
   return (
     <aside className="w-64 bg-[#0B2545] flex flex-col flex-shrink-0 min-h-screen">

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
+import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
 
 export default function AdminDokumenAction({
@@ -49,13 +50,13 @@ export default function AdminDokumenAction({
         throw new Error(result.error);
       }
 
-      alert("Status dokumen berhasil diperbarui");
+      Swal.fire({ icon: "success", title: "Berhasil", text: "Status dokumen berhasil diperbarui" });
 
       router.refresh();
 
     } catch (err: any) {
 
-      alert(err.message);
+      Swal.fire({ icon: "error", title: "Gagal", text: err.message || "Gagal perbarui status" });
 
     } finally {
 
@@ -149,7 +150,7 @@ export default function AdminDokumenAction({
             </>
           ) : (
             <>
-              {status === "DITERIMA" ? (
+              {status === "DISETUJUI" ? (
                 <CheckCircle size={16} />
               ) : status === "DITOLAK" ? (
                 <XCircle size={16} />

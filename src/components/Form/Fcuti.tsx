@@ -14,6 +14,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
+import Swal from "sweetalert2";
 
 export default function Fcuti({
   rawData,
@@ -71,7 +72,7 @@ export default function Fcuti({
         atasan2Nama: dcuti.atasan2Nama || "",
         atasan2Nip: dcuti.atasan2Nip || "",
       });
-      setFile({name:dcuti.filePendukungUrl || ""})
+      setFile({name:dcuti.filePendukungUrl || ""} as any)
     }
   }, [dcuti]);
 
@@ -169,8 +170,8 @@ export default function Fcuti({
 
     const selectedFile = e.target.files[0];
 
-    if (selectedFile.size > 5 * 1024 * 1024) {
-      alert("Ukuran file maksimal 5MB");
+    if (selectedFile.size > 10 * 1024 * 1024) {
+      Swal.fire({ icon: "error", title: "Gagal", text: "Ukuran file maksimal 10MB" });
       return;
     }
 
@@ -204,10 +205,10 @@ export default function Fcuti({
         throw new Error(err.error || "Gagal mengirim pengajuan");
       }
 
-      alert("Pengajuan cuti berhasil dikirim!");
+      await Swal.fire({ icon: "success", title: "Berhasil", text: "Pengajuan cuti berhasil dikirim!" });
       router.push("/dashboard/cuti");
     } catch (error: any) {
-      alert(error.message);
+      Swal.fire({ icon: "error", title: "Gagal", text: error.message || "Gagal mengirim pengajuan" });
     } finally {
       setLoading(false);
     }
@@ -490,7 +491,7 @@ export default function Fcuti({
                   {file ? file.name : "Klik atau seret file ke sini"}
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
-                  {file ? `${(file.size / 1024).toFixed(1)} KB` : "PDF, JPG, atau PNG (Maks. 5MB)"}
+                  {file ? `${(file.size / 1024).toFixed(1)} KB` : "PDF, JPG, atau PNG (Maks. 10MB)"}
                 </p>
                 <input 
                   type="file" 

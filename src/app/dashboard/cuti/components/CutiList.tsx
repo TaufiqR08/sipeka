@@ -16,6 +16,7 @@ import {
   Pen
 } from "lucide-react";
 import Link from "next/link";
+import Swal from "sweetalert2";
 
 interface CutiListProps {
   data: any[];
@@ -96,9 +97,9 @@ export function CutiList({ data: initialData, me }: CutiListProps) {
       setPendingStatus(null);
       setRejectionReason("");
 
-      alert(`Status pengajuan berhasil diubah menjadi: ${newStatus}`);
+      Swal.fire({ icon: "success", title: "Berhasil", text: `Status pengajuan berhasil diubah menjadi: ${newStatus}` });
     } catch (error: any) {
-      alert(error.message);
+      Swal.fire({ icon: "error", title: "Gagal", text: error.message || "Gagal update status" });
     }
   };
   

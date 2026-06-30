@@ -251,11 +251,11 @@ export async function PUT(req: NextRequest) {
       },
     });
 
-    let payload={
+    let payload: any = {
       status: status.toUpperCase(),
-      alasanPenolakan:alasanPenolakan,
-    } 
-    const tt = JSON.parse(dcuti?.tt);
+      alasanPenolakan: alasanPenolakan,
+    };
+    const tt = JSON.parse(dcuti?.tt || "{}");
     const { atasan1Nip, atasan2Nip} = tt ;
     switch (atasanStatus) {
       case "1":
