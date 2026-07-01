@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   FileText,
   Upload,
+  Lock,
 } from "lucide-react";
 import Link from "next/link";
 import AdminDokumenAction from "./AdminDokumenAction";
@@ -25,10 +26,16 @@ export default function LFormEntri({
         idDaft: string
         ) => {
         try {
-            const data = new FormData();
+            // Validasi client-side: pastikan idLaya tersedia dan bukan 'undefined'
+            const idLaya = dlayanan?.idLaya;
+            if (!idLaya || idLaya === "undefined" || idLaya.trim() === "") {
+                Swal.fire({ icon: "error", title: "Gagal", text: "ID Layanan tidak valid. Silakan muat ulang halaman." });
+                return;
+            }
 
+            const data = new FormData();
             data.append("file", file);
-            data.append("idLaya", dlayanan?.idLaya || "");
+            data.append("idLaya", idLaya);
             data.append("idDaft", idDaft);
 
             const res = await fetch(
@@ -97,23 +104,51 @@ export default function LFormEntri({
 
             <div className="p-6 space-y-4">
 
-                {ddokument.map((item: any) => {
+                {(() => {
+                  // Hitung apakah semua dokumen NON-surat pengantar sudah DISETUJUI
+                  const nonSuratPengantar = ddokument.filter(
+                    (d: any) => !d.nmDaft.toLowerCase().includes("surat pengantar")
+                  );
+                  const allOtherDocsApproved =
+                    nonSuratPengantar.length > 0 &&
+                    nonSuratPengantar.every((d: any) => {
+                      const dok = d.listDokumen?.[0];
+                      return dok?.status === "DISETUJUI";
+                    });
 
-                const existing = item.listDokumen?.[0];
-                    
-                return (
+                  return ddokument.map((item: any) => {
+                    const existing = item.listDokumen?.[0];
+                    const isSuratPengantar = item.nmDaft
+                      .toLowerCase()
+                      .includes("surat pengantar");
+                    const suratPengantarLocked =
+                      isSuratPengantar && !allOtherDocsApproved;
+
+                    return (
                     <div
                     key={item.idDaft}
-                    className="border border-gray-200 rounded-xl p-4"
+                    className={`border rounded-xl p-4 ${
+                      suratPengantarLocked
+                        ? "border-amber-300 bg-amber-50/50"
+                        : "border-gray-200"
+                    }`}
                     >
 
                     {/* HEADER */}
                     <div className="flex items-start justify-between gap-4">
 
                         <div>
-                        <h3 className="font-medium text-gray-900">
-                            {item.nmDaft}
-                        </h3>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-medium text-gray-900">
+                              {item.nmDaft}
+                          </h3>
+                          {suratPengantarLocked && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
+                              <Lock size={10} />
+                              Menunggu Persetujuan
+                            </span>
+                          )}
+                        </div>
 
                         {item.ketDaft && (
                             <p className="text-xs text-gray-500 mt-1">
@@ -159,6 +194,7 @@ export default function LFormEntri({
                             <a
                                 href={existing.file}
                                 target="_blank"
+                                rel="noopener noreferrer"
                                 className="text-xs text-blue-600 hover:underline"
                             >
                                 Lihat File
@@ -167,7 +203,16 @@ export default function LFormEntri({
                         </div>
 
                         {
-                            ((!sf.detail && existing.status!="DISETUJUI") || (sf.isAdmin && item.nmDaft.toLowerCase().includes("surat pengantar")))  &&
+                            // Pegawai: bisa ganti jika bukan DISETUJUI DAN bukan surat pengantar terkunci
+                            // Admin: bisa ganti dokumen milik pegawai, KECUALI surat pengantar yang terkunci
+                            ((
+                              !sf.detail &&
+                              existing.status !== "DISETUJUI" &&
+                              !suratPengantarLocked
+                            ) || (
+                              sf.isAdmin &&
+                              !suratPengantarLocked
+                            )) &&
                             <label className="cursor-pointer text-sm text-blue-600 hover:underline">
                                 Ganti File
                                 <input
@@ -193,35 +238,46 @@ export default function LFormEntri({
 
                     {/* BELUM ADA FILE */}
                     {!existing?.file && sf.on && (
-                        <label className="mt-4 border-2 border-dashed border-gray-300 rounded-xl p-6 flex flex-col items-center justify-center hover:border-blue-500 hover:bg-blue-50 transition-all cursor-pointer">
-                        {
-                            (!sf.detail || (sf.isAdmin && item.nmDaft.toLowerCase().includes("surat pengantar")))  &&
-                            <>
-                                <Upload
-                                    size={28}
-                                    className="text-gray-400 mb-2"
-                                />
+                      suratPengantarLocked ? (
+                        // Surat pengantar terkunci — tampilkan pesan
+                        <div className="mt-4 border-2 border-dashed border-amber-300 rounded-xl p-5 flex flex-col items-center justify-center bg-amber-50 text-center">
+                          <Upload size={28} className="text-amber-400 mb-2" />
+                          <p className="text-sm font-semibold text-amber-700">
+                            Upload Surat Pengantar Terkunci
+                          </p>
+                          <p className="text-xs text-amber-600 mt-1 max-w-xs">
+                            Semua dokumen lainnya harus disetujui terlebih dahulu sebelum Surat Pengantar dapat diupload.
+                          </p>
+                        </div>
+                      ) : (
+                        // Dokumen bisa diupload
+                        (!sf.detail || sf.isAdmin) && (
+                          <label className="mt-4 border-2 border-dashed border-gray-300 rounded-xl p-6 flex flex-col items-center justify-center hover:border-blue-500 hover:bg-blue-50 transition-all cursor-pointer">
+                              <Upload
+                                  size={28}
+                                  className="text-gray-400 mb-2"
+                              />
 
-                                <p className="text-sm font-medium text-gray-800">
-                                    Upload Dokumen
-                                </p>
+                              <p className="text-sm font-medium text-gray-800">
+                                  Upload Dokumen
+                              </p>
 
-                                <p className="text-xs text-gray-500 mt-1">
-                                    PDF, JPG, PNG (Maks. 10MB)
-                                </p>
+                              <p className="text-xs text-gray-500 mt-1">
+                                  PDF, JPG, PNG (Maks. 10MB)
+                              </p>
 
-                                <input
-                                    type="file"
-                                    hidden
-                                    accept=".pdf,.jpg,.jpeg,.png"
-                                    onChange={async (e) => {
-                                        const file = e.target.files?.[0];
-                                        if (file) handleUpload(file, item.idDaft);
-                                    }}
-                                />
-                            </>
-                        }
-                        </label>
+                              <input
+                                  type="file"
+                                  hidden
+                                  accept=".pdf,.jpg,.jpeg,.png"
+                                  onChange={async (e) => {
+                                      const file = e.target.files?.[0];
+                                      if (file) handleUpload(file, item.idDaft);
+                                  }}
+                              />
+                          </label>
+                        )
+                      )
                     )}
 
                     {/* CATATAN ADMIN */}
@@ -237,8 +293,9 @@ export default function LFormEntri({
                         </div>
                     )}
                     </div>
-                );
-                })}
+                  );
+                  });
+                })()}
             </div>
         </div>
     </>
