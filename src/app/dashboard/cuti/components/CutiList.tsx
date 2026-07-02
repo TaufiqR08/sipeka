@@ -306,6 +306,12 @@ export function CutiList({ data: initialData, me }: CutiListProps) {
                 <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">Alasan Pengajuan</p>
                 <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded-lg border border-gray-100 mt-1 italic">{selectedItem.alasan}</p>
               </div>
+              {selectedItem.alasanSpesifik && (
+                <div>
+                  <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">Keterangan Spesifik</p>
+                  <p className="text-sm text-gray-900 bg-blue-50 p-3 rounded-lg border border-blue-100 mt-1 italic">{selectedItem.alasanSpesifik}</p>
+                </div>
+              )}
               {selectedItem.alasanPenolakan &&
                 <div>
                   <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">Alasan Penolakan</p>

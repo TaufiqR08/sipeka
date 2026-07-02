@@ -66,6 +66,7 @@ export async function POST(req: NextRequest) {
     // ======================
     const jenisCuti = formData.get("jenisCuti") as string;
     const alasan = formData.get("alasan") as string;
+    const alasanSpesifik = formData.get("alasanSpesifik") as string | null;
     const tanggalMulai = formData.get("tanggalMulai") as string;
     const tanggalSelesai = formData.get("tanggalSelesai") as string;
     const jumlahHari = parseInt(formData.get("jumlahHari") as string || "0");
@@ -156,6 +157,7 @@ export async function POST(req: NextRequest) {
       pegawaiId: pegawai.id,
       jenisCuti: jenisCuti as any,
       alasan,
+      alasanSpesifik: alasanSpesifik || null,
       tanggalMulai: new Date(tanggalMulai),
       tanggalSelesai: new Date(tanggalSelesai),
       jumlahHari,

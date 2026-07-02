@@ -32,6 +32,7 @@ export default function Fcuti({
   const [formData, setFormData] = useState({
     jenisCuti: "",
     alasan: "",
+    alasanSpesifik: "",
     tanggalMulai: "",
     tanggalSelesai: "",
     jumlahHari: "",
@@ -53,6 +54,7 @@ export default function Fcuti({
       setFormData({
         jenisCuti: dcuti.jenisCuti || "",
         alasan: dcuti.alasan || "",
+        alasanSpesifik: dcuti.alasanSpesifik || "",
         tanggalMulai: dcuti.tanggalMulai
           ? new Date(dcuti.tanggalMulai).toISOString().split("T")[0]
           : "",
@@ -369,6 +371,21 @@ export default function Fcuti({
                     <option value="TAHUN">Tahun</option> */}
                   </select>
                 </div>
+              </div>
+
+              <div className="space-y-2 md:col-span-2">
+                <label className="text-sm font-medium text-gray-700">
+                  Alasan Spesifik / Keterangan Tambahan
+                  <span className="text-gray-400 font-normal ml-1">(opsional)</span>
+                </label>
+                <textarea
+                  name="alasanSpesifik"
+                  rows={3}
+                  placeholder="Jelaskan alasan atau keterangan tambahan secara lebih spesifik (contoh: nama anggota keluarga yang sakit, acara pernikahan tanggal berapa, dsb.)"
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all resize-none text-sm"
+                  value={formData.alasanSpesifik}
+                  onChange={handleChange}
+                />
               </div>
 
               <div className="space-y-2 md:col-span-2">

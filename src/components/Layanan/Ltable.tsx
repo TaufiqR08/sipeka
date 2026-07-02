@@ -3,7 +3,7 @@
 import { ProtectedLayout } from "@/components/layout/ProtectedLayout";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, TrendingUp, CheckCircle, Clock, Upload, Eye, Shield, Check, ChevronRight } from "lucide-react";
+import { Plus, TrendingUp, CheckCircle, Clock, Upload, Eye, Shield, Check, ChevronRight, Download } from "lucide-react";
 import Swal from "sweetalert2";
 import Link from "next/link";
 import {formatDateShort, getRemainingDays } from "@/lib/sfBGS"
@@ -27,6 +27,7 @@ export default function Fcuti({
   };
 
   const [selectedItem, _selectedItem] = useState<any>({item:{},modal:false});
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   const {modal, item }= selectedItem;
   
@@ -59,6 +60,33 @@ export default function Fcuti({
         Swal.fire({ icon: "error", title: "Gagal", text: err.message || "Gagal upload" });
     }
   };
+
+  const handleDownloadZip = async (idLaya: string, namaPegawai: string) => {
+    try {
+      setDownloadingId(idLaya);
+      const res = await fetch(`/api/layanan/download-zip/${idLaya}`);
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Gagal mengunduh dokumen");
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const contentDisposition = res.headers.get("Content-Disposition");
+      const match = contentDisposition?.match(/filename="([^"]+)"/);
+      a.download = match ? match[1] : `dokumen_${namaPegawai}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err: any) {
+      Swal.fire({ icon: "error", title: "Gagal", text: err.message || "Gagal mengunduh" });
+    } finally {
+      setDownloadingId(null);
+    }
+  };
+  
   
   return (
       <>
@@ -190,6 +218,21 @@ export default function Fcuti({
                               </div>
                               <span className="text-[10px] font-medium text-gray-400 group-hover:text-blue-600">Detail</span>
                             </Link>
+                            {item.listDokumen?.length > 0 && (
+                              <button
+                                onClick={() => handleDownloadZip(item.idLaya, item.pimpinan?.nama || "")}
+                                disabled={downloadingId === item.idLaya}
+                                className="flex flex-col items-center group gap-1 disabled:opacity-50"
+                              >
+                                <div className="p-2 text-gray-400 group-hover:text-green-600 group-hover:bg-green-50 rounded-lg transition-all">
+                                  {downloadingId === item.idLaya
+                                    ? <svg className="animate-spin" width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" strokeOpacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10" /></svg>
+                                    : <Download size={18} />
+                                  }
+                                </div>
+                                <span className="text-[10px] font-medium text-gray-400 group-hover:text-green-600">ZIP</span>
+                              </button>
+                            )}
                             {(listStatus?.filter((v: any) => v.status === "DISETUJUI").length || 0) === (ddokument?.length || 0) && item.aktif &&
                               <button 
                                 onClick={() => { _selectedItem({modal:true,item})}}

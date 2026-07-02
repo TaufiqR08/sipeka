@@ -73,6 +73,7 @@ export default async function CutiPage() {
     statusr:item.status,
     alasanPenolakan: item.alasanPenolakan,
     alasan: item.alasan,
+    alasanSpesifik: item.alasanSpesifik,
     pegawaiId:item.pegawaiId,
     ...JSON.parse(item.tt)
   }));

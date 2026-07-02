@@ -6,6 +6,7 @@ import {
   FileText,
   Upload,
   Lock,
+  Download,
 } from "lucide-react";
 import Link from "next/link";
 import AdminDokumenAction from "./AdminDokumenAction";
@@ -60,36 +61,85 @@ export default function LFormEntri({
         }
     };
 
+    const [downloadingZip, setDownloadingZip] = useState(false);
+
+    const handleDownloadZip = async () => {
+        if (!dlayanan?.idLaya) return;
+        try {
+            setDownloadingZip(true);
+            const res = await fetch(`/api/layanan/download-zip/${dlayanan.idLaya}`);
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.error || "Gagal mengunduh dokumen");
+            }
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            const contentDisposition = res.headers.get("Content-Disposition");
+            const match = contentDisposition?.match(/filename="([^"]+)"/);
+            a.download = match ? match[1] : `dokumen_${sf.nmKate}.zip`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (err: any) {
+            Swal.fire({ icon: "error", title: "Gagal", text: err.message || "Gagal mengunduh" });
+        } finally {
+            setDownloadingZip(false);
+        }
+    };
+
     // console.log(sf.remainingDays>0 || dlayanan.aktif);
     
   return (
       <>
       <div className="max-w-4xl mx-auto space-y-6 pb-12">
         {/* Breadcrumb & Back */}
-        <div className="flex items-center gap-4">
-          <Link 
-            href={"/dashboard/layanan/"+sf.idKate} 
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <ArrowLeft size={20} className="text-gray-600" />
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Pengajuan {sf.nmKate} {sf.detail ? ", An. "+sf.nm:""}</h1>
-            <p className="p-1 text-gray-600 text-sm text-yellow-700 bg-yellow-100">
-                {
-                    (!dlayanan || dlayanan.aktif) &&
-                    (
-                        sf.remainingDays>0  ?
-                        ""
-                            +(
-                                sf.on? 
-                                "Lengkapi formulir di bawah ini untuk mengajukan " + sf.nmKate + ", batas pengumpulan berkas "+sf.remainingDays+" hari lagi":
-                                "Maaf belum waktunya untuk melakukan pengajuan ("+sf.remainingDays+" hari lagi)"):
-                        "Tanggal pengajuan anda telah telat "+sf.remainingDays+" hari"
-                    )
-                }
-            </p>
+        <div className="flex items-center gap-4 justify-between">
+          <div className="flex items-center gap-4">
+            <Link 
+              href={"/dashboard/layanan/"+sf.idKate} 
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <ArrowLeft size={20} className="text-gray-600" />
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Pengajuan {sf.nmKate} {sf.detail ? ", An. "+sf.nm:""}</h1>
+              <p className="p-1 text-gray-600 text-sm text-yellow-700 bg-yellow-100">
+                  {
+                      (!dlayanan || dlayanan.aktif) &&
+                      (
+                          sf.remainingDays>0  ?
+                          ""
+                              +(
+                                  sf.on? 
+                                  "Lengkapi formulir di bawah ini untuk mengajukan " + sf.nmKate + ", batas pengumpulan berkas "+sf.remainingDays+" hari lagi":
+                                  "Maaf belum waktunya untuk melakukan pengajuan ("+sf.remainingDays+" hari lagi)"):
+                          "Tanggal pengajuan anda telah telat "+sf.remainingDays+" hari"
+                      )
+                  }
+              </p>
+            </div>
           </div>
+          {/* Tombol Download ZIP */}
+          {ddokument.some((d: any) => d.listDokumen?.[0]) && (
+            <button
+              onClick={handleDownloadZip}
+              disabled={downloadingZip}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all font-medium shadow-sm disabled:opacity-50 text-sm"
+            >
+              {downloadingZip ? (
+                <svg className="animate-spin" width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10" strokeOpacity="0.25"/>
+                  <path d="M12 2a10 10 0 0 1 10 10" />
+                </svg>
+              ) : (
+                <Download size={16} />
+              )}
+              Download Semua Dokumen (ZIP)
+            </button>
+          )}
         </div>
 
         
