@@ -2,10 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import * as archiver from "archiver";
+import JSZip from "jszip";
 import fs from "fs";
 import path from "path";
-import { PassThrough } from "stream";
 
 export async function GET(
   req: NextRequest,
@@ -47,27 +46,18 @@ export async function GET(
     const kategoriNm = layanan.kategori?.nmKate?.replace(/\s+/g, "_") || "dokumen";
     const zipName = `${kategoriNm}_${pegawaiNama}_${idLaya.slice(-6)}.zip`;
 
-    // Buat stream untuk archiver
-    const passThrough = new PassThrough();
-    const archive = archiver("zip", { zlib: { level: 9 } });
-
-    archive.on("error", (err: any) => {
-      console.error("Archive error:", err);
-    });
-
-    // Pipe archive ke passthrough stream
-    archive.pipe(passThrough);
+    // Buat ZIP menggunakan JSZip
+    const zip = new JSZip();
 
     // Tambahkan setiap file ke ZIP
     for (const dok of layanan.listDokumen) {
       const fileRelPath = dok.file; // misal: /uploads/KGB/xxx.pdf
 
-      // Jika path dimulai dengan /uploads/, resolve ke public/uploads/
+      // Resolve path absolut
       let absolutePath: string;
       if (fileRelPath.startsWith("/uploads/")) {
         absolutePath = path.join(process.cwd(), "public", fileRelPath);
       } else if (fileRelPath.startsWith("/api/uploads/")) {
-        // Path via API route — convert ke path langsung
         const restPath = fileRelPath.replace("/api/uploads/", "");
         absolutePath = path.join(process.cwd(), "public", "uploads", restPath);
       } else {
@@ -77,24 +67,19 @@ export async function GET(
       if (fs.existsSync(absolutePath)) {
         const ext = path.extname(absolutePath);
         const namaFile = `${dok.daftar.nmDaft.replace(/\s+/g, "_")}${ext}`;
-        archive.file(absolutePath, { name: namaFile });
+        const fileBuffer = fs.readFileSync(absolutePath);
+        zip.file(namaFile, fileBuffer);
       }
     }
 
-    // Finalize archive
-    await archive.finalize();
-
-    // Collect buffer dari passthrough
-    const chunks: Buffer[] = [];
-    await new Promise<void>((resolve, reject) => {
-      passThrough.on("data", (chunk) => chunks.push(chunk));
-      passThrough.on("end", resolve);
-      passThrough.on("error", reject);
+    // Generate ZIP sebagai Buffer
+    const zipBuffer = await zip.generateAsync({
+      type: "nodebuffer",
+      compression: "DEFLATE",
+      compressionOptions: { level: 9 },
     });
 
-    const zipBuffer = Buffer.concat(chunks);
-
-    return new NextResponse(zipBuffer, {
+    return new NextResponse(new Uint8Array(zipBuffer), {
       status: 200,
       headers: {
         "Content-Type": "application/zip",
