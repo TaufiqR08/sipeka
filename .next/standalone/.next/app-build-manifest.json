@@ -39,6 +39,24 @@
       "static/chunks/main-app-117a2e939b38e16d.js",
       "static/chunks/app/auth/layout-df9a3b8171920937.js"
     ],
+    "/dashboard/cuti/baru/page": [
+      "static/chunks/webpack-3c4ed26df8443b6d.js",
+      "static/chunks/fd9d1056-b778a18b0daf24fe.js",
+      "static/chunks/23-959059d5e1f9e610.js",
+      "static/chunks/main-app-117a2e939b38e16d.js",
+      "static/chunks/41ade5dc-c55aa7be4302201e.js",
+      "static/chunks/998-da42871a05f4e6f0.js",
+      "static/chunks/192-dc6d2bd4786dd064.js",
+      "static/chunks/835-004bfb90f90b5a04.js",
+      "static/chunks/app/dashboard/cuti/baru/page-e743fe0528371d01.js"
+    ],
+    "/dashboard/layout": [
+      "static/chunks/webpack-3c4ed26df8443b6d.js",
+      "static/chunks/fd9d1056-b778a18b0daf24fe.js",
+      "static/chunks/23-959059d5e1f9e610.js",
+      "static/chunks/main-app-117a2e939b38e16d.js",
+      "static/chunks/app/dashboard/layout-dab02cb79919c3c7.js"
+    ],
     "/dashboard/cuti/page": [
       "static/chunks/webpack-3c4ed26df8443b6d.js",
       "static/chunks/fd9d1056-b778a18b0daf24fe.js",
@@ -51,21 +69,7 @@
       "static/chunks/635-2f3ea9808f77ef56.js",
       "static/chunks/app/dashboard/cuti/page-430c4c1fe7692803.js"
     ],
-    "/dashboard/layout": [
-      "static/chunks/webpack-3c4ed26df8443b6d.js",
-      "static/chunks/fd9d1056-b778a18b0daf24fe.js",
-      "static/chunks/23-959059d5e1f9e610.js",
-      "static/chunks/main-app-117a2e939b38e16d.js",
-      "static/chunks/app/dashboard/layout-dab02cb79919c3c7.js"
-    ],
-    "/dashboard/cuti/pdf/[id]/page": [
-      "static/chunks/webpack-3c4ed26df8443b6d.js",
-      "static/chunks/fd9d1056-b778a18b0daf24fe.js",
-      "static/chunks/23-959059d5e1f9e610.js",
-      "static/chunks/main-app-117a2e939b38e16d.js",
-      "static/chunks/app/dashboard/cuti/pdf/[id]/page-35dceb5e137f5698.js"
-    ],
-    "/dashboard/cuti/baru/page": [
+    "/dashboard/layanan/[id]/[idLaya]/page": [
       "static/chunks/webpack-3c4ed26df8443b6d.js",
       "static/chunks/fd9d1056-b778a18b0daf24fe.js",
       "static/chunks/23-959059d5e1f9e610.js",
@@ -74,7 +78,27 @@
       "static/chunks/998-da42871a05f4e6f0.js",
       "static/chunks/192-dc6d2bd4786dd064.js",
       "static/chunks/835-004bfb90f90b5a04.js",
-      "static/chunks/app/dashboard/cuti/baru/page-e743fe0528371d01.js"
+      "static/chunks/742-b1094ffe64a5efd7.js",
+      "static/chunks/app/dashboard/layanan/[id]/[idLaya]/page-610e0d636805f1e8.js"
+    ],
+    "/dashboard/cuti/riwayat/page": [
+      "static/chunks/webpack-3c4ed26df8443b6d.js",
+      "static/chunks/fd9d1056-b778a18b0daf24fe.js",
+      "static/chunks/23-959059d5e1f9e610.js",
+      "static/chunks/main-app-117a2e939b38e16d.js",
+      "static/chunks/41ade5dc-c55aa7be4302201e.js",
+      "static/chunks/998-da42871a05f4e6f0.js",
+      "static/chunks/192-dc6d2bd4786dd064.js",
+      "static/chunks/835-004bfb90f90b5a04.js",
+      "static/chunks/635-2f3ea9808f77ef56.js",
+      "static/chunks/app/dashboard/cuti/riwayat/page-bd51aa88562d6e85.js"
+    ],
+    "/dashboard/cuti/pdf/[id]/page": [
+      "static/chunks/webpack-3c4ed26df8443b6d.js",
+      "static/chunks/fd9d1056-b778a18b0daf24fe.js",
+      "static/chunks/23-959059d5e1f9e610.js",
+      "static/chunks/main-app-117a2e939b38e16d.js",
+      "static/chunks/app/dashboard/cuti/pdf/[id]/page-35dceb5e137f5698.js"
     ],
     "/dashboard/kgb/page": [
       "static/chunks/webpack-3c4ed26df8443b6d.js",
@@ -89,19 +113,7 @@
       "static/chunks/513-a76b98464d5d619f.js",
       "static/chunks/app/dashboard/kgb/page-cc41b8b6b3aefc0e.js"
     ],
-    "/dashboard/cuti/riwayat/page": [
-      "static/chunks/webpack-3c4ed26df8443b6d.js",
-      "static/chunks/fd9d1056-b778a18b0daf24fe.js",
-      "static/chunks/23-959059d5e1f9e610.js",
-      "static/chunks/main-app-117a2e939b38e16d.js",
-      "static/chunks/41ade5dc-c55aa7be4302201e.js",
-      "static/chunks/998-da42871a05f4e6f0.js",
-      "static/chunks/192-dc6d2bd4786dd064.js",
-      "static/chunks/835-004bfb90f90b5a04.js",
-      "static/chunks/635-2f3ea9808f77ef56.js",
-      "static/chunks/app/dashboard/cuti/riwayat/page-bd51aa88562d6e85.js"
-    ],
-    "/dashboard/layanan/[id]/[idLaya]/page": [
+    "/dashboard/layanan/[id]/new/page": [
       "static/chunks/webpack-3c4ed26df8443b6d.js",
       "static/chunks/fd9d1056-b778a18b0daf24fe.js",
       "static/chunks/23-959059d5e1f9e610.js",
@@ -111,7 +123,7 @@
       "static/chunks/192-dc6d2bd4786dd064.js",
       "static/chunks/835-004bfb90f90b5a04.js",
       "static/chunks/742-b1094ffe64a5efd7.js",
-      "static/chunks/app/dashboard/layanan/[id]/[idLaya]/page-610e0d636805f1e8.js"
+      "static/chunks/app/dashboard/layanan/[id]/new/page-bdbb7fb88cc40f85.js"
     ],
     "/dashboard/layanan/[id]/page": [
       "static/chunks/webpack-3c4ed26df8443b6d.js",
@@ -126,28 +138,6 @@
       "static/chunks/513-a76b98464d5d619f.js",
       "static/chunks/app/dashboard/layanan/[id]/page-f34b31e4529b4bf1.js"
     ],
-    "/dashboard/layanan/[id]/new/page": [
-      "static/chunks/webpack-3c4ed26df8443b6d.js",
-      "static/chunks/fd9d1056-b778a18b0daf24fe.js",
-      "static/chunks/23-959059d5e1f9e610.js",
-      "static/chunks/main-app-117a2e939b38e16d.js",
-      "static/chunks/41ade5dc-c55aa7be4302201e.js",
-      "static/chunks/998-da42871a05f4e6f0.js",
-      "static/chunks/192-dc6d2bd4786dd064.js",
-      "static/chunks/835-004bfb90f90b5a04.js",
-      "static/chunks/742-b1094ffe64a5efd7.js",
-      "static/chunks/app/dashboard/layanan/[id]/new/page-bdbb7fb88cc40f85.js"
-    ],
-    "/dashboard/pangkat/page": [
-      "static/chunks/webpack-3c4ed26df8443b6d.js",
-      "static/chunks/fd9d1056-b778a18b0daf24fe.js",
-      "static/chunks/23-959059d5e1f9e610.js",
-      "static/chunks/main-app-117a2e939b38e16d.js",
-      "static/chunks/998-da42871a05f4e6f0.js",
-      "static/chunks/192-dc6d2bd4786dd064.js",
-      "static/chunks/835-004bfb90f90b5a04.js",
-      "static/chunks/app/dashboard/pangkat/page-9a42deb06f303515.js"
-    ],
     "/dashboard/layanan/[id]/riwayat/page": [
       "static/chunks/webpack-3c4ed26df8443b6d.js",
       "static/chunks/fd9d1056-b778a18b0daf24fe.js",
@@ -161,16 +151,6 @@
       "static/chunks/513-a76b98464d5d619f.js",
       "static/chunks/app/dashboard/layanan/[id]/riwayat/page-502208e75c7fe04c.js"
     ],
-    "/dashboard/page": [
-      "static/chunks/webpack-3c4ed26df8443b6d.js",
-      "static/chunks/fd9d1056-b778a18b0daf24fe.js",
-      "static/chunks/23-959059d5e1f9e610.js",
-      "static/chunks/main-app-117a2e939b38e16d.js",
-      "static/chunks/998-da42871a05f4e6f0.js",
-      "static/chunks/192-dc6d2bd4786dd064.js",
-      "static/chunks/835-004bfb90f90b5a04.js",
-      "static/chunks/app/dashboard/page-4a088200ea1ced0d.js"
-    ],
     "/dashboard/pegawai/page": [
       "static/chunks/webpack-3c4ed26df8443b6d.js",
       "static/chunks/fd9d1056-b778a18b0daf24fe.js",
@@ -182,6 +162,16 @@
       "static/chunks/835-004bfb90f90b5a04.js",
       "static/chunks/app/dashboard/pegawai/page-3bd33cbd3a8a2e9d.js"
     ],
+    "/dashboard/page": [
+      "static/chunks/webpack-3c4ed26df8443b6d.js",
+      "static/chunks/fd9d1056-b778a18b0daf24fe.js",
+      "static/chunks/23-959059d5e1f9e610.js",
+      "static/chunks/main-app-117a2e939b38e16d.js",
+      "static/chunks/998-da42871a05f4e6f0.js",
+      "static/chunks/192-dc6d2bd4786dd064.js",
+      "static/chunks/835-004bfb90f90b5a04.js",
+      "static/chunks/app/dashboard/page-4a088200ea1ced0d.js"
+    ],
     "/dashboard/pemberitahuan/page": [
       "static/chunks/webpack-3c4ed26df8443b6d.js",
       "static/chunks/fd9d1056-b778a18b0daf24fe.js",
@@ -191,6 +181,16 @@
       "static/chunks/192-dc6d2bd4786dd064.js",
       "static/chunks/835-004bfb90f90b5a04.js",
       "static/chunks/app/dashboard/pemberitahuan/page-40101f6ed647cfa0.js"
+    ],
+    "/dashboard/pangkat/page": [
+      "static/chunks/webpack-3c4ed26df8443b6d.js",
+      "static/chunks/fd9d1056-b778a18b0daf24fe.js",
+      "static/chunks/23-959059d5e1f9e610.js",
+      "static/chunks/main-app-117a2e939b38e16d.js",
+      "static/chunks/998-da42871a05f4e6f0.js",
+      "static/chunks/192-dc6d2bd4786dd064.js",
+      "static/chunks/835-004bfb90f90b5a04.js",
+      "static/chunks/app/dashboard/pangkat/page-9a42deb06f303515.js"
     ]
   }
 }
