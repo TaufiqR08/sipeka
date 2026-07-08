@@ -157,7 +157,7 @@ export async function POST(req: NextRequest) {
       pegawaiId: pegawai.id,
       jenisCuti: jenisCuti as any,
       alasan,
-      alasanSpesifik: alasanSpesifik || null,
+      alasanSpesifik: alasanSpesifik || "",
       tanggalMulai: new Date(tanggalMulai),
       tanggalSelesai: new Date(tanggalSelesai),
       jumlahHari,
