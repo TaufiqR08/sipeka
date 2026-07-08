@@ -69,6 +69,7 @@ CREATE TABLE `Cuti` (
     `jumlahHari` INTEGER NOT NULL,
     `durasiJenis` VARCHAR(191) NOT NULL DEFAULT 'HARI',
     `alasan` TEXT NOT NULL,
+    `alasanSpesifik` TEXT NULL,
     `alamatSelama` TEXT NULL,
     `sisaCuti` INTEGER NULL,
     `status` ENUM('DRAFT', 'MENUNGGU_ATASAN_1', 'MENUNGGU_ATASAN_2', 'MENUNGGU_ADMIN', 'DISETUJUI', 'DITOLAK') NOT NULL DEFAULT 'DRAFT',
