@@ -1,11 +1,19 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 export default function PCutiPage(
     {v}: {v: any}
 ) {
   const formRef = useRef<HTMLDivElement>(null);
+  const [tglCetak, setTglCetak] = useState<string>(new Date().toISOString().split('T')[0]);
+
+  const formatTanggalIndo = (dateStr: string) => {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    const bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+    return `${date.getDate()} ${bulan[date.getMonth()]} ${date.getFullYear()}`;
+  };
 
   const handlePrint = () => {
     if (formRef.current) {
@@ -83,9 +91,16 @@ export default function PCutiPage(
                     vertical-align: top;
                 }
                 @media print {
-                  body { margin: 0; padding: 0; }
+                  @page { size: A4 portrait; margin: 0.5cm; }
+                  body { margin: 0; padding: 0; -webkit-print-color-adjust: exact; font-size: 11px; line-height: 1.2; }
                   .no-print { display: none; }
                   button { display: none; }
+                  .form-table { margin-bottom: 2px !important; }
+                  .form-table td, .form-table th { padding: 2px 4px !important; font-size: 11px !important; }
+                  .mb-5 { margin-bottom: 4px !important; }
+                  .p-2 { padding: 2px !important; }
+                  .ttd-area { min-height: 45px !important; margin: 1px 0 !important; }
+                  br { margin: 0; padding: 0; }
                 }
               </style>
             </head>
@@ -108,8 +123,18 @@ export default function PCutiPage(
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-6 font-serif">
       <div className="max-w-5xl mx-auto">
-        {/* Tombol cetak/PDF */}
-        <div className="flex justify-end mb-4 no-print">
+        {/* Tombol cetak/PDF & Input Tanggal */}
+        <div className="flex justify-between items-center mb-4 no-print">
+          <div className="flex items-center gap-2">
+            <label htmlFor="tglCetak" className="font-semibold text-gray-700">Tanggal Cetak:</label>
+            <input 
+              type="date" 
+              id="tglCetak" 
+              className="border border-gray-300 rounded-md px-3 py-2 w-auto bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
+              value={tglCetak} 
+              onChange={(e) => setTglCetak(e.target.value)} 
+            />
+          </div>
           <button
             onClick={handlePrint}
             className="bg-blue-700 hover:bg-blue-800 text-white font-semibold py-2 px-5 rounded-md shadow-md transition flex items-center gap-2"
@@ -119,16 +144,15 @@ export default function PCutiPage(
         </div>
 
         {/* Formulir - konten yang akan dicetak */}
-        <div ref={formRef} className="bg-white shadow-xl rounded-md p-6 md:p-8 print:shadow-none">    
+        <div ref={formRef} className="bg-white shadow-xl rounded-md p-6 md:p-8 print:shadow-none print:p-0 print:m-0">    
             <table className="form-table w-full mb-5">
                 <tbody>
                     <tr>
                         <td className="w-[70%] font-semibold"></td>
                         <td className="w-[30%]">
-                            <span>Taliwang, </span>
-                                <span className="inline-block min-w-[100px]"></span> 
-                                2026 <br/>
-                                <span>Kepada <br/> 
+                            <span>Taliwang, {tglCetak ? formatTanggalIndo(tglCetak) : '..................................'}</span>
+                            <br/>
+                            <span>Kepada <br/> 
                             </span>
                         </td>
                     </tr>
@@ -250,7 +274,7 @@ export default function PCutiPage(
                 <tbody>
                     <tr>
                         <td className="w-[15%] font-semibold border border-black p-2">Selama</td>
-                        <td className="w-[23%] border border-black p-2"> (hari/<span className="line-through">bulan</span>/<span className="line-through">tahun</span>)*</td>
+                        <td className="w-[23%] border border-black p-2">{v.jumlahHari} (hari/<span className="line-through">bulan</span>/<span className="line-through">tahun</span>)*</td>
                         <td className="w-[15%] font-semibold border border-black p-2">Mulai tanggal</td>
                         <td className="w-[15%] border border-black p-2">{v.dateS}</td>
                         <td className="w-[5%] border border-black p-2">s/d</td>
@@ -338,16 +362,19 @@ export default function PCutiPage(
                 </thead>
                 <tbody> 
                     <tr> 
-                        <td className="w-[20%] font-semibold border border-black p-2">DISETUJUI</td>
-                        <td className="w-[20%] border border-black p-2">PERUBAHAN****</td>
-                        <td className="w-[20%] font-semibold border border-black p-2">DITANGGUHKAN****</td>
-                        <td className="w-[40%] font-semibold border border-black p-2">TIDAK DISETUJUI****</td>
+                        <td className="w-[20%] font-semibold border border-black p-2 text-center">DISETUJUI</td>
+                        <td className="w-[20%] border border-black p-2 text-center">PERUBAHAN****</td>
+                        <td className="w-[20%] font-semibold border border-black p-2 text-center">DITANGGUHKAN****</td>
+                        <td className="w-[40%] font-semibold border border-black p-2 text-center">TIDAK DISETUJUI****</td>
                     </tr>
                     <tr>
-                        <td className=""></td>
-                        <td className=""></td>
-                        <td className=""></td>
+                        <td className="border border-black p-2 text-center align-top text-2xl font-bold">
+                            {v.atasan1Status === 'DISETUJUI' ? '✓' : ''}
+                        </td>
+                        <td className="border border-black p-2 text-center align-top text-2xl font-bold"></td>
+                        <td className="border border-black p-2 text-center align-top text-2xl font-bold"></td>
                         <td className="border border-black p-2 text-center">
+                            {v.atasan1Status?.includes?.('DITOLAK') ? <div className="text-2xl font-bold mb-2">✓</div> : ''}
                             <span>{v.atasan1Jabatan}, </span>
                             <div className="ttd-area">
                               <div className="ttd-placeholder">
@@ -376,16 +403,19 @@ export default function PCutiPage(
                 </thead>
                 <tbody> 
                     <tr> 
-                        <td className="w-[20%] font-semibold border border-black p-2">DISETUJUI</td>
-                        <td className="w-[20%] border border-black p-2">PERUBAHAN****</td>
-                        <td className="w-[20%] font-semibold border border-black p-2">DITANGGUHKAN****</td>
-                        <td className="w-[40%] font-semibold border border-black p-2">TIDAK DISETUJUI****</td>
+                        <td className="w-[20%] font-semibold border border-black p-2 text-center">DISETUJUI</td>
+                        <td className="w-[20%] border border-black p-2 text-center">PERUBAHAN****</td>
+                        <td className="w-[20%] font-semibold border border-black p-2 text-center">DITANGGUHKAN****</td>
+                        <td className="w-[40%] font-semibold border border-black p-2 text-center">TIDAK DISETUJUI****</td>
                     </tr>
                     <tr>
-                        <td className=""></td>
-                        <td className=""></td>
-                        <td className=""></td>
+                        <td className="border border-black p-2 text-center align-top text-2xl font-bold">
+                            {v.atasan2Status === 'DISETUJUI' ? '✓' : ''}
+                        </td>
+                        <td className="border border-black p-2 text-center align-top text-2xl font-bold"></td>
+                        <td className="border border-black p-2 text-center align-top text-2xl font-bold"></td>
                         <td className="border border-black p-2 text-center">
+                            {v.atasan2Status?.includes?.('DITOLAK') ? <div className="text-2xl font-bold mb-2">✓</div> : ''}
                             <span>{v.atasan2Jabatan}, </span>
                             <div className="ttd-area">
                               <div className="ttd-placeholder">
