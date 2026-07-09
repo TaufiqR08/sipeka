@@ -160,7 +160,9 @@ export default function PCutiPage(
                         <td className="w-[70%] font-semibold text-end">
                             <span className="min-w-[120px]">Yth.</span>
                         </td>
-                        <td className="w-[30%]">
+                        <td className="w-[30%] font-semibold">
+                            {v.atasan2Jabatan}<br/>
+                            {v.atasan2Nama}
                         </td>
                     </tr>
                     <tr>
@@ -368,11 +370,19 @@ export default function PCutiPage(
                         <td className="w-[40%] font-semibold border border-black p-2 text-center">TIDAK DISETUJUI****</td>
                     </tr>
                     <tr>
+                        {/* Kolom DISETUJUI */}
                         <td className="border border-black p-2 text-center align-top text-2xl font-bold">
                             {v.atasan1Status === 'DISETUJUI' ? '✓' : ''}
                         </td>
-                        <td className="border border-black p-2 text-center align-top text-2xl font-bold"></td>
-                        <td className="border border-black p-2 text-center align-top text-2xl font-bold"></td>
+                        {/* Kolom PERUBAHAN */}
+                        <td className="border border-black p-2 text-center align-top text-2xl font-bold">
+                            {v.atasan1Status === 'PERUBAHAN' ? '✓' : ''}
+                        </td>
+                        {/* Kolom DITANGGUHKAN */}
+                        <td className="border border-black p-2 text-center align-top text-2xl font-bold">
+                            {v.atasan1Status === 'DITANGGUHKAN' ? '✓' : ''}
+                        </td>
+                        {/* Kolom TIDAK DISETUJUI + TTD */}
                         <td className="border border-black p-2 text-center">
                             {v.atasan1Status?.includes?.('DITOLAK') ? <div className="text-2xl font-bold mb-2">✓</div> : ''}
                             <span>{v.atasan1Jabatan}, </span>

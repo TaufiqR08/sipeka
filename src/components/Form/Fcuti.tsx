@@ -453,7 +453,7 @@ export default function Fcuti({
           <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
             <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex items-center gap-2">
               <User size={18} className="text-purple-600" />
-              <h2 className="font-semibold text-gray-800">Atasan yang Berwenang (Atasan 2)</h2>
+              <h2 className="font-semibold text-gray-800">Atasan yang Berwenang / Yth. (Atasan 2)</h2>
             </div>
             <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
